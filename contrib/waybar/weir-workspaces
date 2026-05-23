@@ -1,0 +1,30 @@
+#!/bin/sh
+# Waybar custom module showing weir workspaces.
+#
+# river 0.4 removed the river-status protocol, so waybar's built-in
+# "river/tags" module does not work. This script feeds a "custom" module
+# from weir's state-change subscription instead. It prints one JSON line per
+# state change in waybar's custom-module format and reconnects if weir
+# restarts.
+#
+# Requires jq. See README.md in this directory for the waybar config.
+set -u
+
+while :; do
+    weirctl subscribe 2>/dev/null | jq --unbuffered -c '
+        .state as $s
+        | ($s.outputs // [] | map(select(.focused)) | first | .workspace // "") as $cur
+        | ($s.workspaces // []
+            | map(select(.visible or ((.windows // []) | length > 0)))
+            | map(.name)) as $names
+        | (if ($names | index($cur)) == null and $cur != "" then $names + [$cur] else $names end
+            | sort) as $names
+        | {
+            text: ($names | map(if . == $cur then "<b>[\(.)]</b>" else " \(.) " end) | join("")),
+            tooltip: ("workspace \($cur) focused"),
+            class: "weir-workspaces"
+          }
+    '
+    # weir is not running or restarted; try again shortly.
+    sleep 2
+done

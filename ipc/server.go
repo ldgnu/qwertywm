@@ -176,6 +176,17 @@ func (s *Server) streamEvents(conn net.Conn) {
 		close(gone)
 	}()
 
+	// Send the current state immediately so a bar that subscribes has
+	// something to render before the first change happens.
+	if out, err := s.handler.Command([]string{"get", "state"}); err == nil && out != "" {
+		line, err := json.Marshal(Event{Event: "state", State: json.RawMessage(out)})
+		if err == nil {
+			if _, err := conn.Write(append(line, '\n')); err != nil {
+				return
+			}
+		}
+	}
+
 	for {
 		select {
 		case line := <-sub.ch:
