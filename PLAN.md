@@ -186,9 +186,10 @@ Each milestone ends in something runnable and tested.
       headless virtual outputs. (Partially done: scripts/integration-test.sh
       asserts 14 weirctl-driven checks against a real headless river;
       remaining work is CI wiring and multi-output coverage.)
-- [ ] **M6 — input**: keyboard bindings (`river-xkb-bindings-v1`), pointer
+- [x] **M6 — input**: keyboard bindings (`river-xkb-bindings-v1`), pointer
       bindings + interactive move/resize (`op_start_pointer`), focus follows
-      interaction policy.
+      interaction policy, spawn. Key presses are integration-tested end to
+      end by injecting them through a virtual keyboard (wtype).
 - [ ] **M7 — multi-output polish**: locked workspace mode, directional
       navigation, output remove/re-add restoration.
 

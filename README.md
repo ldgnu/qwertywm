@@ -6,9 +6,17 @@ unix socket, first-class multi-output support.
 
 A weir is a small dam that controls a river's flow.
 
-**Status: early development.** The pure window-management core (model,
-layouts, commands) is implemented and tested; the Wayland protocol layer is
-not yet written. See [PLAN.md](PLAN.md) for the design and roadmap.
+**Status: early development, but functional.** Tiling, workspaces,
+multi-output, key/pointer bindings, and the control socket all work against
+river 0.4.5. See [PLAN.md](PLAN.md) for the design and roadmap, and
+[example/init](example/init) for a complete xmonad-flavored configuration.
+
+```sh
+go install github.com/psanford/weir/cmd/weir@latest
+go install github.com/psanford/weir/cmd/weirctl@latest
+cp example/init ~/.config/river/init && chmod +x ~/.config/river/init
+river
+```
 
 ## Layout
 

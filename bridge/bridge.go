@@ -33,6 +33,20 @@ type Bridge struct {
 	wm       *river.WindowManagerV1
 	seat     *river.SeatV1 // first seat; weir is single-seat for now
 
+	// xkbBindings is the river_xkb_bindings_v1 global, or nil if the
+	// compositor does not advertise it (key bindings are then disabled).
+	xkbBindings *river.XkbBindingsV1
+	// keyBindings and pointerBindings track the protocol objects created
+	// for each model binding.
+	keyBindings     map[chord]*keyBindingState
+	pointerBindings map[pointerChord]*pointerBindingState
+	// pointerWindow is the window the seat's pointer is currently inside,
+	// or 0. Maintained from pointer_enter/pointer_leave events and used to
+	// pick the target of an interactive move/resize.
+	pointerWindow core.WindowID
+	// opActive is true while an interactive pointer operation is running.
+	opActive bool
+
 	// outputGlobals maps wl_output global names to their advertised
 	// versions, so the bridge can bind them at a supported version when a
 	// river_output_v1.wl_output event references one.
@@ -115,12 +129,14 @@ func New(conn *wire.Conn, model *core.Model, logger *slog.Logger) *Bridge {
 		logger = slog.Default()
 	}
 	return &Bridge{
-		conn:          conn,
-		model:         model,
-		log:           logger,
-		windows:       make(map[core.WindowID]*windowState),
-		outputs:       make(map[core.OutputID]*outputState),
-		outputGlobals: make(map[uint32]uint32),
+		conn:            conn,
+		model:           model,
+		log:             logger,
+		windows:         make(map[core.WindowID]*windowState),
+		outputs:         make(map[core.OutputID]*outputState),
+		outputGlobals:   make(map[uint32]uint32),
+		keyBindings:     make(map[chord]*keyBindingState),
+		pointerBindings: make(map[pointerChord]*pointerBindingState),
 	}
 }
 
@@ -132,11 +148,16 @@ func (b *Bridge) Bootstrap() error {
 	b.registry = b.conn.Display.GetRegistry()
 	var wmName, wmVersion uint32
 	found := false
+	var xkbName, xkbVersion uint32
+	xkbFound := false
 	b.registry.OnGlobal = func(name uint32, iface string, version uint32) {
 		switch iface {
 		case river.WindowManagerV1Name:
 			wmName, wmVersion = name, version
 			found = true
+		case river.XkbBindingsV1Name:
+			xkbName, xkbVersion = name, version
+			xkbFound = true
 		case wl.OutputName:
 			b.outputGlobals[name] = version
 		}
@@ -155,6 +176,14 @@ func (b *Bridge) Bootstrap() error {
 	}
 	b.wm = river.BindWindowManagerV1(b.registry, wmName, wmVersion)
 	b.installWMHandlers()
+	if xkbFound {
+		if xkbVersion > river.XkbBindingsV1Version {
+			xkbVersion = river.XkbBindingsV1Version
+		}
+		b.xkbBindings = river.BindXkbBindingsV1(b.registry, xkbName, xkbVersion)
+	} else {
+		b.log.Warn("compositor does not advertise river_xkb_bindings_v1; key bindings are disabled")
+	}
 	// A round trip guarantees we see unavailable (if it is coming) before
 	// we start doing real work: the protocol promises unavailable is the
 	// first and only event if it is sent at all.
@@ -250,8 +279,32 @@ func (b *Bridge) addWindow(w *river.WindowV1) {
 	w.OnExitFullscreenRequested = func() {
 		b.model.WindowExitFullscreenRequested(ws.id)
 	}
+	// Interactive move/resize requested by the window itself (e.g. a
+	// client-side titlebar drag). Honored with the same op machinery as
+	// pointer bindings.
+	w.OnPointerMoveRequested = func(seat *river.SeatV1) {
+		if seat != b.seat || seat == nil {
+			return
+		}
+		if b.model.StartPointerOp(ws.id, core.PointerActionMove) {
+			b.opActive = true
+			seat.OpStartPointer()
+		}
+	}
+	w.OnPointerResizeRequested = func(seat *river.SeatV1, edges river.WindowV1Edges) {
+		if seat != b.seat || seat == nil {
+			return
+		}
+		// Resize always tracks the bottom-right corner regardless of the
+		// requested edges; supporting arbitrary edges is a refinement for
+		// later.
+		if b.model.StartPointerOp(ws.id, core.PointerActionResize) {
+			b.opActive = true
+			seat.OpStartPointer()
+		}
+	}
 	// Requests weir chooses to ignore entirely: maximize, minimize, window
-	// menu, interactive move/resize (until M6).
+	// menu.
 }
 
 // idForProxy returns the core ID for a window proxy, or 0.
@@ -355,9 +408,23 @@ func (b *Bridge) addSeat(s *river.SeatV1) {
 			b.model.WindowInteracted(id)
 		}
 	}
+	// Track which window the pointer is inside so pointer bindings know
+	// their target. Focus-follows-mouse is deliberately not implemented;
+	// focus moves on click/interaction only.
 	s.OnPointerEnter = func(w *river.WindowV1) {
-		// Focus-follows-mouse is a policy decision for the model; for now
-		// weir focuses on click/interaction only.
+		b.pointerWindow = b.idForProxy(w)
+	}
+	s.OnPointerLeave = func() {
+		b.pointerWindow = 0
+	}
+	// Interactive move/resize.
+	s.OnOpDelta = func(dx, dy int32) {
+		if b.opActive {
+			b.model.PointerOpDelta(dx, dy)
+		}
+	}
+	s.OnOpRelease = func() {
+		b.endPointerOp()
 	}
 }
 
@@ -379,6 +446,8 @@ func (b *Bridge) manage() {
 		}
 	}
 	b.model.CloseRequests = b.model.CloseRequests[:0]
+
+	b.syncBindings()
 
 	b.arrangement = b.model.Arrange()
 	b.model.ClearChanged()
@@ -628,9 +697,12 @@ func (b *Bridge) Run(cmds <-chan Command) error {
 }
 
 // runCommand executes a command on the bridge goroutine and carries out
-// any protocol-level actions the command requested of the bridge.
+// any protocol-level actions the command requested of the bridge. It is
+// the single entry point for commands from the IPC socket and from key and
+// pointer bindings.
 func (b *Bridge) runCommand(args []string) (string, error) {
 	out, err := b.model.Dispatch(args)
+	b.drainSideEffects()
 	if b.model.ExitRequested && !b.exiting {
 		// End the entire Wayland session. The compositor will disconnect
 		// every client including weir; the run loop then returns cleanly.

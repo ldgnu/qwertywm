@@ -122,6 +122,21 @@ type Model struct {
 	// asking the compositor to end the Wayland session.
 	ExitRequested bool
 
+	// SpawnRequests is the list of shell commands queued by the spawn
+	// command. The bridge drains and executes them after each command
+	// dispatch.
+	SpawnRequests []string
+
+	// Bindings are the key bindings, keyed by chord. The bridge syncs
+	// this set to river_xkb_binding_v1 protocol objects.
+	Bindings map[bindingKey]Binding
+
+	// PointerBindings are the pointer-button bindings, keyed by chord.
+	PointerBindings map[pointerBindingKey]PointerBinding
+
+	// op is the interactive pointer move/resize in progress, or nil.
+	op *pointerOp
+
 	// changed is set by any mutation and consumed by the bridge to decide
 	// whether a manage_dirty request is needed.
 	changed bool
@@ -161,6 +176,8 @@ func NewModel() *Model {
 		Mode:              ModeIndependent,
 		DefaultWorkspaces: names,
 		Borders:           DefaultBorders(),
+		Bindings:          make(map[bindingKey]Binding),
+		PointerBindings:   make(map[pointerBindingKey]PointerBinding),
 	}
 }
 

@@ -1,0 +1,70 @@
+#!/bin/sh
+# Example river init script for weir. Install as ~/.config/river/init
+# (and make it executable). River runs this once its Wayland socket is up.
+#
+# There is no config file: this script *is* the configuration, exactly like
+# river-classic. Re-run any weirctl command at any time to change things.
+
+# Start the window manager.
+weir &
+
+# Give it a moment to take the window manager role and open its control
+# socket before configuring it.
+sleep 0.2
+
+# --- appearance -------------------------------------------------------------
+weirctl set border-width 2
+weirctl set border-color-focused   0x93a1a1
+weirctl set border-color-unfocused 0x586e75
+weirctl set gaps 4 8
+weirctl set smart-gaps on
+
+# --- layout -----------------------------------------------------------------
+weirctl set main-ratio 0.6
+weirctl set main-location left
+# weirctl workspace-mode locked     # uncomment for gnome-style workspaces
+
+# --- key bindings (xmonad-flavored) ----------------------------------------
+mod=Super
+
+weirctl bind $mod+Return        spawn foot
+weirctl bind $mod+p             spawn 'fuzzel'
+weirctl bind $mod+Shift+c       close
+weirctl bind $mod+Shift+q       exit
+
+weirctl bind $mod+j             focus next
+weirctl bind $mod+k             focus prev
+weirctl bind $mod+m             focus main
+weirctl bind $mod+Shift+j       swap next
+weirctl bind $mod+Shift+k       swap prev
+weirctl bind $mod+Shift+Return  zoom
+
+weirctl bind $mod+h             set main-ratio -0.05
+weirctl bind $mod+l             set main-ratio +0.05
+weirctl bind $mod+comma         set main-count +1
+weirctl bind $mod+period        set main-count -1
+weirctl bind $mod+space         set-layout monocle
+weirctl bind $mod+Shift+space   set-layout tile
+
+weirctl bind $mod+t             toggle-float
+weirctl bind $mod+f             toggle-fullscreen
+
+weirctl bind $mod+w             focus-output left
+weirctl bind $mod+e             focus-output right
+weirctl bind $mod+Shift+w       send-to-output left
+weirctl bind $mod+Shift+e       send-to-output right
+
+# Workspaces 1-9: view with $mod+N, send with $mod+Shift+N.
+for i in 1 2 3 4 5 6 7 8 9; do
+    weirctl bind $mod+$i view $i
+    weirctl bind $mod+Shift+$i send $i
+done
+
+# --- pointer bindings -------------------------------------------------------
+weirctl bind-pointer $mod+Left  move
+weirctl bind-pointer $mod+Right resize
+
+# --- session ----------------------------------------------------------------
+# Anything else you want running: bars, wallpaper, idle daemons...
+# waybar &
+# swaybg -i ~/wallpaper.png &

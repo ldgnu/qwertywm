@@ -143,13 +143,24 @@ func classify(iface string, opcode uint16) reqKind {
 		}
 	case "river_seat_v1":
 		switch opcode {
-		case seatReqDestroy:
+		case seatReqDestroy, seatReqGetPointerBinding:
 			return kindNeutral
 		default:
 			return kindManage
 		}
 	case "river_output_v1":
 		return kindNeutral
+	case "river_xkb_bindings_v1":
+		// Object creation only; the created bindings are enabled
+		// separately.
+		return kindNeutral
+	case "river_xkb_binding_v1", "river_pointer_binding_v1":
+		switch opcode {
+		case 0: // destroy
+			return kindNeutral
+		default: // set_layout_override / enable / disable
+			return kindManage
+		}
 	}
 	return kindNeutral
 }
@@ -177,6 +188,9 @@ type fakeRiver struct {
 	nextServerID uint32
 	registryID   uint32
 	wmID         uint32
+	xkbID        uint32
+	// seatID is the most recently added seat's object ID.
+	seatID uint32
 	// ifaces maps every known object ID to its interface name so requests
 	// can be classified. Populated from bind/get_node/new_id requests and
 	// from the server's own object announcements.
@@ -218,26 +232,42 @@ func (f *fakeRiver) bootstrap() {
 	d := m.Decoder()
 	f.registryID, _ = d.Uint()
 	f.ifaces[f.registryID] = "wl_registry"
-	// Announce the window manager global as name 7.
+	// Announce the window manager global as name 7 and the xkb bindings
+	// global as name 8.
 	e := &wire.Encoder{}
 	e.PutUint(7)
 	e.PutString(river.WindowManagerV1Name)
 	e.PutUint(river.WindowManagerV1Version)
 	f.server.Send(f.registryID, 0, e)
+	e = &wire.Encoder{}
+	e.PutUint(8)
+	e.PutString(river.XkbBindingsV1Name)
+	e.PutUint(river.XkbBindingsV1Version)
+	f.server.Send(f.registryID, 0, e)
 	// sync #1
 	f.respondSync()
-	// bind
-	m = f.server.Recv()
-	if m.Object != f.registryID || m.Opcode != 0 {
-		f.t.Errorf("expected registry.bind, got %d.%d", m.Object, m.Opcode)
+	// bind x2 (window manager, then xkb bindings)
+	for i := 0; i < 2; i++ {
+		m = f.server.Recv()
+		if m.Object != f.registryID || m.Opcode != 0 {
+			f.t.Errorf("expected registry.bind, got %d.%d", m.Object, m.Opcode)
+		}
+		d = m.Decoder()
+		d.Uint() // global name
+		bindIface, _, _ := d.String()
+		d.Uint() // version
+		id, _ := d.Uint()
+		f.ifaces[id] = bindIface
+		switch bindIface {
+		case river.WindowManagerV1Name:
+			f.wmID = id
+		case river.XkbBindingsV1Name:
+			f.xkbID = id
+		}
 	}
-	d = m.Decoder()
-	d.Uint()   // global name
-	d.String() // interface
-	d.Uint()   // version
-	id, _ := d.Uint()
-	f.wmID = id
-	f.ifaces[id] = "river_window_manager_v1"
+	if f.wmID == 0 || f.xkbID == 0 {
+		f.t.Errorf("client did not bind both globals (wm=%d xkb=%d)", f.wmID, f.xkbID)
+	}
 	// sync #2
 	f.respondSync()
 
@@ -314,6 +344,15 @@ func (f *fakeRiver) handleRequest(m wiretest.Msg) {
 		d := req.decoder()
 		id, _ := d.Uint()
 		f.ifaces[id] = "river_node_v1"
+	case iface == "river_xkb_bindings_v1" && m.Opcode == xkbBindingsReqGetXkbBinding:
+		d := req.decoder()
+		d.Object() // seat
+		id, _ := d.Uint()
+		f.ifaces[id] = "river_xkb_binding_v1"
+	case iface == "river_seat_v1" && m.Opcode == seatReqGetPointerBinding:
+		d := req.decoder()
+		id, _ := d.Uint()
+		f.ifaces[id] = "river_pointer_binding_v1"
 	case iface == "wl_registry" && m.Opcode == 0:
 		// bind: record the new object's interface.
 		d := req.decoder()
@@ -370,6 +409,7 @@ func (f *fakeRiver) addSeat() uint32 {
 	e := &wire.Encoder{}
 	e.PutUint(id)
 	f.server.Send(f.wmID, wmEvSeat, e)
+	f.seatID = id
 	return id
 }
 

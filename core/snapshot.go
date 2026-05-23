@@ -13,6 +13,14 @@ type Snapshot struct {
 	Outputs       []OutputSnapshot    `json:"outputs"`
 	Workspaces    []WorkspaceSnapshot `json:"workspaces"`
 	Windows       []WindowSnapshot    `json:"windows"`
+	Bindings      []BindingSnapshot   `json:"bindings,omitempty"`
+}
+
+type BindingSnapshot struct {
+	Chord   string   `json:"chord"`
+	Pointer bool     `json:"pointer,omitempty"`
+	Action  string   `json:"action,omitempty"`
+	Command []string `json:"command,omitempty"`
 }
 
 type OutputSnapshot struct {
@@ -115,5 +123,26 @@ func (m *Model) Snapshot() Snapshot {
 			Focused:    p.Focused,
 		})
 	}
+
+	for _, b := range m.Bindings {
+		s.Bindings = append(s.Bindings, BindingSnapshot{
+			Chord:   b.Chord(),
+			Command: append([]string(nil), b.Command...),
+		})
+	}
+	for _, b := range m.PointerBindings {
+		s.Bindings = append(s.Bindings, BindingSnapshot{
+			Chord:   b.Chord(),
+			Pointer: true,
+			Action:  string(b.Action),
+			Command: append([]string(nil), b.Command...),
+		})
+	}
+	sort.Slice(s.Bindings, func(i, j int) bool {
+		if s.Bindings[i].Pointer != s.Bindings[j].Pointer {
+			return !s.Bindings[i].Pointer
+		}
+		return s.Bindings[i].Chord < s.Bindings[j].Chord
+	})
 	return s
 }

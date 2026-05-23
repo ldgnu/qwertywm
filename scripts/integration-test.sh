@@ -93,6 +93,33 @@ expect "windows on workspace 1 are now hidden" \
 sleep 0.5
 expect "close removes the window" '.windows | length == 2'
 
+# Key bindings: register, list, and (if wtype is available) actually press.
+"$ctl" view 1 || fail "view 1"
+"$ctl" bind Super+j focus next || fail "bind"
+"$ctl" bind Super+8 view 8 || fail "bind view"
+"$ctl" bind-pointer Super+Left move || fail "bind-pointer"
+expect "bindings appear in the state" \
+    '(.bindings | length == 3) and ([.bindings[].chord] | contains(["Super+j"]))'
+if [ -n "${WTYPE:-}" ]; then
+    # Inject a real Super+8 key press through a virtual keyboard. It must
+    # travel compositor -> xkb binding -> weir -> view 8.
+    "$WTYPE" -M logo -P 8 -p 8 -m logo 2>>"$verdict" || fail "wtype"
+    sleep 0.5
+    expect "pressing Super+8 switches to workspace 8" \
+        '.outputs[0].workspace == "8"'
+fi
+"$ctl" unbind Super+j || fail "unbind"
+expect "unbind removes the binding" '.bindings | length == 2'
+
+# Spawn: the child must run inside the session.
+"$ctl" spawn "touch $WEIR_TEST_DIR/spawned" || fail "spawn"
+sleep 0.5
+if [ -f "$WEIR_TEST_DIR/spawned" ]; then
+    ok "spawn runs a command"
+else
+    fail "spawn did not run the command"
+fi
+
 echo done >>"$verdict"
 "$ctl" exit
 TESTEOF
@@ -103,6 +130,7 @@ env -i \
     PATH="$PATH" \
     WEIR_TEST_DIR="$dir" \
     FOOT="$FOOT" \
+    WTYPE="${WTYPE:-}" \
     XDG_RUNTIME_DIR="$dir/run" \
     WLR_BACKENDS=headless \
     WLR_RENDERER=pixman \
