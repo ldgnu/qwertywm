@@ -86,7 +86,7 @@ func init() {
 		{"input", "input <device-glob> <property> <value>", "set a libinput device property (run \"input\" alone to list them)", "input", cmdInput},
 		{"list-inputs", "list-inputs", "list input devices", "input", cmdListInputs},
 
-		{"get", "get state|outputs|windows|workspaces", "query weir state as JSON", "queries", cmdGet},
+		{"get", "get state|outputs|windows|workspaces|settings", "query weir state as JSON", "queries", cmdGet},
 		{"help", "help [command]", "list commands or show usage for one", "queries", cmdHelp},
 
 		{"spawn", "spawn <command...>", "run a shell command", "session", cmdSpawn},
@@ -813,7 +813,7 @@ func cmdWorkspaceMode(m *Model, args []string) (string, error) {
 
 func cmdGet(m *Model, args []string) (string, error) {
 	if len(args) != 1 {
-		return "", cmdErrf("usage: get state|outputs|windows|workspaces")
+		return "", cmdErrf("usage: get state|outputs|windows|workspaces|settings")
 	}
 	var v any
 	switch args[0] {
@@ -825,8 +825,10 @@ func cmdGet(m *Model, args []string) (string, error) {
 		v = m.Snapshot().Windows
 	case "workspaces":
 		v = m.Snapshot().Workspaces
+	case "settings":
+		v = m.Snapshot().Settings
 	default:
-		return "", cmdErrf("usage: get state|outputs|windows|workspaces")
+		return "", cmdErrf("usage: get state|outputs|windows|workspaces|settings")
 	}
 	b, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {

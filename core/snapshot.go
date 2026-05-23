@@ -1,6 +1,9 @@
 package core
 
-import "sort"
+import (
+	"fmt"
+	"sort"
+)
 
 // Snapshot is a JSON-serializable copy of the model, returned by
 // "get state" and friends. It is the scripting surface for bars and tools
@@ -10,10 +13,25 @@ type Snapshot struct {
 	Mode          WorkspaceMode       `json:"mode"`
 	FocusedOutput string              `json:"focused_output,omitempty"`
 	FocusedWindow WindowID            `json:"focused_window,omitempty"`
+	Settings      SettingsSnapshot    `json:"settings"`
 	Outputs       []OutputSnapshot    `json:"outputs"`
 	Workspaces    []WorkspaceSnapshot `json:"workspaces"`
 	Windows       []WindowSnapshot    `json:"windows"`
 	Bindings      []BindingSnapshot   `json:"bindings,omitempty"`
+}
+
+// SettingsSnapshot holds the global (non-per-workspace) settings so that
+// everything configurable with "set" is also queryable. Colors are
+// 0xRRGGBBAA strings to match the format "set" accepts.
+type SettingsSnapshot struct {
+	BorderWidth          int32  `json:"border_width"`
+	BorderColorFocused   string `json:"border_color_focused"`
+	BorderColorUnfocused string `json:"border_color_unfocused"`
+	BorderColorUrgent    string `json:"border_color_urgent"`
+	SmartBorders         bool   `json:"smart_borders"`
+	FocusFollowsCursor   bool   `json:"focus_follows_cursor"`
+	XcursorTheme         string `json:"xcursor_theme,omitempty"`
+	XcursorSize          uint32 `json:"xcursor_size,omitempty"`
 }
 
 type BindingSnapshot struct {
@@ -76,6 +94,11 @@ type WindowSnapshot struct {
 	Focused   bool     `json:"focused"`
 }
 
+// colorString renders a color the same way the set command accepts it.
+func colorString(c uint32) string {
+	return fmt.Sprintf("0x%08x", c)
+}
+
 // Snapshot builds a serializable copy of the model, including the computed
 // arrangement so callers see actual geometry rather than internal state.
 func (m *Model) Snapshot() Snapshot {
@@ -83,6 +106,16 @@ func (m *Model) Snapshot() Snapshot {
 
 	s := Snapshot{
 		Mode: m.Mode,
+		Settings: SettingsSnapshot{
+			BorderWidth:          m.Borders.Width,
+			BorderColorFocused:   colorString(m.Borders.FocusedColor),
+			BorderColorUnfocused: colorString(m.Borders.UnfocusedColor),
+			BorderColorUrgent:    colorString(m.Borders.UrgentColor),
+			SmartBorders:         m.Borders.SmartBorders,
+			FocusFollowsCursor:   m.FocusFollowsCursor,
+			XcursorTheme:         m.XcursorTheme,
+			XcursorSize:          m.XcursorSize,
+		},
 	}
 	if out, ok := m.Outputs[m.FocusedOutput]; ok {
 		s.FocusedOutput = out.Name

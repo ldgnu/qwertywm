@@ -22,22 +22,23 @@ const (
 )
 
 // LayoutParams are the per-workspace knobs that parameterize a layout.
-// Every field is adjustable at runtime via the command interface.
+// Every field is adjustable at runtime via the command interface. The json
+// tags are part of the snapshot schema.
 type LayoutParams struct {
 	// MainRatio is the fraction of the output occupied by the main area,
 	// clamped to [MinMainRatio, MaxMainRatio].
-	MainRatio float64
+	MainRatio float64 `json:"main_ratio"`
 	// MainCount is the number of windows in the main area, >= 1.
-	MainCount int
+	MainCount int `json:"main_count"`
 	// MainLocation is the edge the main area is attached to.
-	MainLocation MainLocation
+	MainLocation MainLocation `json:"main_location"`
 	// InnerGap is the gap in pixels between adjacent windows.
-	InnerGap int32
+	InnerGap int32 `json:"inner_gap"`
 	// OuterGap is the gap in pixels between windows and the output edge.
-	OuterGap int32
+	OuterGap int32 `json:"outer_gap"`
 	// SmartGaps disables all gaps when the layout would place only one
 	// window on the output.
-	SmartGaps bool
+	SmartGaps bool `json:"smart_gaps"`
 }
 
 const (
