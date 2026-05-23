@@ -28,7 +28,7 @@ not yet written. See [PLAN.md](PLAN.md) for the design and roadmap.
 ## Developing
 
 ```sh
-go test ./...          # unit + property tests, no compositor needed
+go test ./...          # unit + property + protocol tests, no compositor needed
 go run ./cmd/wmsim example/two-outputs.txt
 go run ./cmd/wmsim     # interactive REPL ("help" for syntax)
 ```
@@ -36,4 +36,23 @@ go run ./cmd/wmsim     # interactive REPL ("help" for syntax)
 The property tests in `core/invariants_test.go` drive the model with tens of
 thousands of random operations and check the structural invariants from
 PLAN.md after every step. If you change the model, that suite is the first
-thing to trust.
+thing to trust. The bridge tests in `bridge/` run against a fake compositor
+that fails the test if a request is ever sent in an illegal protocol phase.
+
+### Against a real river
+
+`scripts/smoke-test.sh` runs weir inside a real headless river (wlroots
+headless backend + pixman renderer — no GPU, no display, no seat), opens
+three terminals, and verifies they all map. `scripts/screenshot-test.sh`
+does the same and captures a PNG of the tiled layout via grim.
+
+```sh
+eval "$(scripts/fetch-river.sh)"   # sets $RIVER and $FOOT from the nix cache
+scripts/smoke-test.sh
+```
+
+Or run it nested in your current desktop session to interact with it:
+
+```sh
+go build ./cmd/weir && river -c ./weir
+```
