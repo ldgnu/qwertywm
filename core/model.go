@@ -178,6 +178,10 @@ type Model struct {
 	// the last entry whose device glob matches wins.
 	KeyboardLayouts []KeyboardLayout
 
+	// InputSettings are the desired libinput device properties. For a
+	// given device and property the last matching entry wins.
+	InputSettings []InputSetting
+
 	// op is the interactive pointer move/resize in progress, or nil.
 	op *pointerOp
 

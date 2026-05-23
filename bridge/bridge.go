@@ -38,12 +38,14 @@ type Bridge struct {
 	xkbBindings *river.XkbBindingsV1
 	// inputManager and xkbConfig are the input device discovery and
 	// keyboard keymap configuration globals, or nil if not advertised.
-	inputManager *river.InputManagerV1
-	xkbConfig    *river.XkbConfigV1
-	inputDevices map[core.InputDeviceID]*inputDeviceState
-	xkbKeyboards map[*river.XkbKeyboardV1]*xkbKeyboardState
-	keymaps      map[string]*keymapState
-	nextInputID  core.InputDeviceID
+	inputManager    *river.InputManagerV1
+	xkbConfig       *river.XkbConfigV1
+	libinputConfig  *river.LibinputConfigV1
+	inputDevices    map[core.InputDeviceID]*inputDeviceState
+	xkbKeyboards    map[*river.XkbKeyboardV1]*xkbKeyboardState
+	libinputDevices map[*river.LibinputDeviceV1]*libinputDeviceState
+	keymaps         map[string]*keymapState
+	nextInputID     core.InputDeviceID
 	// CompileKeymap overrides the RMLVO-to-keymap-text compiler. nil uses
 	// xkbcli compile-keymap. Exposed for tests.
 	CompileKeymap func(core.KeyboardLayout) (string, error)
@@ -173,6 +175,7 @@ func New(conn *wire.Conn, model *core.Model, logger *slog.Logger) *Bridge {
 		pointerBindings: make(map[pointerChord]*pointerBindingState),
 		inputDevices:    make(map[core.InputDeviceID]*inputDeviceState),
 		xkbKeyboards:    make(map[*river.XkbKeyboardV1]*xkbKeyboardState),
+		libinputDevices: make(map[*river.LibinputDeviceV1]*libinputDeviceState),
 		keymaps:         make(map[string]*keymapState),
 	}
 }
@@ -193,6 +196,8 @@ func (b *Bridge) Bootstrap() error {
 	imFound := false
 	var xcName, xcVersion uint32
 	xcFound := false
+	var liName, liVersion uint32
+	liFound := false
 	b.registry.OnGlobal = func(name uint32, iface string, version uint32) {
 		switch iface {
 		case river.WindowManagerV1Name:
@@ -210,6 +215,9 @@ func (b *Bridge) Bootstrap() error {
 		case river.XkbConfigV1Name:
 			xcName, xcVersion = name, version
 			xcFound = true
+		case river.LibinputConfigV1Name:
+			liName, liVersion = name, version
+			liFound = true
 		case wl.OutputName:
 			b.outputGlobals[name] = version
 		}
@@ -258,7 +266,16 @@ func (b *Bridge) Bootstrap() error {
 	} else {
 		b.log.Warn("compositor does not advertise river_xkb_config_v1; keyboard-layout is disabled")
 	}
+	if liFound && imFound {
+		if liVersion > river.LibinputConfigV1Version {
+			liVersion = river.LibinputConfigV1Version
+		}
+		b.libinputConfig = river.BindLibinputConfigV1(b.registry, liName, liVersion)
+	} else {
+		b.log.Warn("compositor does not advertise river_libinput_config_v1; the input command is disabled")
+	}
 	b.installInputHandlers()
+	b.installLibinputHandlers()
 	// A round trip guarantees we see unavailable (if it is coming) before
 	// we start doing real work: the protocol promises unavailable is the
 	// first and only event if it is sent at all.
@@ -565,6 +582,7 @@ func (b *Bridge) manage() {
 
 	b.syncBindings()
 	b.syncKeyboardLayouts()
+	b.syncInputSettings()
 
 	b.arrangement = b.model.Arrange()
 	b.model.ClearChanged()

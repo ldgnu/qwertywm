@@ -61,6 +61,14 @@ weirctl workspace-mode independent
 # weirctl keyboard-layout -options ctrl:nocaps us
 # weirctl keyboard-layout -device '*Apple*' -variant mac de
 
+# libinput device properties: natural-scroll, tap, drag, drag-lock,
+# left-handed, middle-emulation, dwt, dwtp (enabled|disabled), and
+# accel-profile (none|flat|adaptive). The glob matches device names from
+# "weirctl list-inputs"; run "weirctl input" alone for the full list.
+# weirctl input '*' natural-scroll disabled
+# weirctl input '*Touchpad*' tap enabled
+# weirctl input '*Touchpad*' dwt enabled
+
 # ---------------------------------------------------------------------------
 # Key bindings
 # ---------------------------------------------------------------------------

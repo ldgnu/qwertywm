@@ -183,3 +183,109 @@ func cmdKeyboardLayout(m *Model, args []string) (string, error) {
 func globMatchErr(pattern string) (bool, error) {
 	return true, validateGlob(pattern)
 }
+
+// ---------------------------------------------------------------------------
+// libinput device settings
+// ---------------------------------------------------------------------------
+
+// InputSetting is a desired libinput property for devices matching a name
+// glob.
+type InputSetting struct {
+	Device   string // glob matched against device names
+	Property string
+	Value    string
+}
+
+func (s InputSetting) String() string {
+	return fmt.Sprintf("%q %s %s", s.Device, s.Property, s.Value)
+}
+
+// inputProperties maps each configurable libinput property to its allowed
+// values. The bridge translates (property, value) pairs into protocol
+// requests; this table is the single source of truth for validation and
+// for the usage text.
+var inputProperties = map[string][]string{
+	"natural-scroll":   {"disabled", "enabled"},
+	"tap":              {"disabled", "enabled"},
+	"drag":             {"disabled", "enabled"},
+	"drag-lock":        {"disabled", "enabled"},
+	"left-handed":      {"disabled", "enabled"},
+	"middle-emulation": {"disabled", "enabled"},
+	"dwt":              {"disabled", "enabled"},
+	"dwtp":             {"disabled", "enabled"},
+	"accel-profile":    {"none", "flat", "adaptive"},
+}
+
+// InputValueIndex returns the protocol enum value for a property value:
+// its index in the allowed-values list (the protocol enums are declared in
+// the same order). ok is false for an unknown property or value.
+func InputValueIndex(property, value string) (uint32, bool) {
+	vals, ok := inputProperties[property]
+	if !ok {
+		return 0, false
+	}
+	for i, v := range vals {
+		if v == value {
+			return uint32(i), true
+		}
+	}
+	return 0, false
+}
+
+// SettingForDevice returns the value configured for a device and property:
+// the last entry whose device glob matches. ok is false if none match.
+func (m *Model) SettingForDevice(name, property string) (InputSetting, bool) {
+	for i := len(m.InputSettings) - 1; i >= 0; i-- {
+		s := m.InputSettings[i]
+		if s.Property == property && globMatch(s.Device, name) {
+			return s, true
+		}
+	}
+	return InputSetting{}, false
+}
+
+// inputUsage lists the configurable properties and their values.
+func inputUsage() string {
+	var b strings.Builder
+	b.WriteString("usage: input <device-glob> <property> <value>\n\nproperties:\n")
+	names := make([]string, 0, len(inputProperties))
+	for name := range inputProperties {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		fmt.Fprintf(&b, "  %-18s %s\n", name, strings.Join(inputProperties[name], "|"))
+	}
+	b.WriteString("\nrun \"list-inputs\" to see device names; the glob matches against them")
+	return b.String()
+}
+
+// cmdInput implements: input <device-glob> <property> <value>
+func cmdInput(m *Model, args []string) (string, error) {
+	if len(args) == 0 {
+		return "", cmdErrf("%s", inputUsage())
+	}
+	if len(args) != 3 {
+		return "", cmdErrf("usage: input <device-glob> <property> <value> (run \"input\" alone for the property list)")
+	}
+	s := InputSetting{Device: args[0], Property: args[1], Value: args[2]}
+	if err := validateGlob(s.Device); err != nil {
+		return "", cmdErrf("invalid device glob %q: %v", s.Device, err)
+	}
+	if _, ok := inputProperties[s.Property]; !ok {
+		return "", cmdErrf("unknown property %q\n\n%s", s.Property, inputUsage())
+	}
+	if _, ok := InputValueIndex(s.Property, s.Value); !ok {
+		return "", cmdErrf("invalid value %q for %s (want %s)", s.Value, s.Property, strings.Join(inputProperties[s.Property], "|"))
+	}
+	for i := range m.InputSettings {
+		if m.InputSettings[i].Device == s.Device && m.InputSettings[i].Property == s.Property {
+			m.InputSettings[i] = s
+			m.markChanged()
+			return "", nil
+		}
+	}
+	m.InputSettings = append(m.InputSettings, s)
+	m.markChanged()
+	return "", nil
+}

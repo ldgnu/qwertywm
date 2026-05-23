@@ -173,7 +173,8 @@ func classify(iface string, opcode uint16) reqKind {
 	case "river_layer_shell_seat_v1":
 		return kindNeutral
 	case "river_input_manager_v1", "river_input_device_v1", "river_xkb_config_v1",
-		"river_xkb_keymap_v1", "river_xkb_keyboard_v1":
+		"river_xkb_keymap_v1", "river_xkb_keyboard_v1", "river_libinput_config_v1",
+		"river_libinput_device_v1", "river_libinput_result_v1":
 		// Input configuration is not window management state.
 		return kindNeutral
 	}
@@ -200,13 +201,14 @@ type fakeRiver struct {
 	bridge *Bridge
 
 	// Object IDs. Server-allocated IDs start at 0xff000000.
-	nextServerID   uint32
-	registryID     uint32
-	wmID           uint32
-	xkbID          uint32
-	layerShellID   uint32
-	inputManagerID uint32
-	xkbConfigID    uint32
+	nextServerID     uint32
+	registryID       uint32
+	wmID             uint32
+	xkbID            uint32
+	layerShellID     uint32
+	inputManagerID   uint32
+	xkbConfigID      uint32
+	libinputConfigID uint32
 	// seatID is the most recently added seat's object ID.
 	seatID uint32
 	// layerShellOutputs maps river_output_v1 IDs to the
@@ -267,6 +269,7 @@ func (f *fakeRiver) bootstrap() {
 		{river.LayerShellV1Name, river.LayerShellV1Version},
 		{river.InputManagerV1Name, river.InputManagerV1Version},
 		{river.XkbConfigV1Name, river.XkbConfigV1Version},
+		{river.LibinputConfigV1Name, river.LibinputConfigV1Version},
 	} {
 		e := &wire.Encoder{}
 		e.PutUint(uint32(7 + i))
@@ -276,8 +279,8 @@ func (f *fakeRiver) bootstrap() {
 	}
 	// sync #1
 	f.respondSync()
-	// bind x5
-	for i := 0; i < 5; i++ {
+	// bind x6
+	for i := 0; i < 6; i++ {
 		m = f.server.Recv()
 		if m.Object != f.registryID || m.Opcode != 0 {
 			f.t.Errorf("expected registry.bind, got %d.%d", m.Object, m.Opcode)
@@ -299,11 +302,13 @@ func (f *fakeRiver) bootstrap() {
 			f.inputManagerID = id
 		case river.XkbConfigV1Name:
 			f.xkbConfigID = id
+		case river.LibinputConfigV1Name:
+			f.libinputConfigID = id
 		}
 	}
-	if f.wmID == 0 || f.xkbID == 0 || f.layerShellID == 0 || f.inputManagerID == 0 || f.xkbConfigID == 0 {
-		f.t.Errorf("client did not bind all globals (wm=%d xkb=%d ls=%d im=%d xc=%d)",
-			f.wmID, f.xkbID, f.layerShellID, f.inputManagerID, f.xkbConfigID)
+	if f.wmID == 0 || f.xkbID == 0 || f.layerShellID == 0 || f.inputManagerID == 0 || f.xkbConfigID == 0 || f.libinputConfigID == 0 {
+		f.t.Errorf("client did not bind all globals (wm=%d xkb=%d ls=%d im=%d xc=%d li=%d)",
+			f.wmID, f.xkbID, f.layerShellID, f.inputManagerID, f.xkbConfigID, f.libinputConfigID)
 	}
 	// sync #2
 	f.respondSync()
@@ -405,6 +410,11 @@ func (f *fakeRiver) handleRequest(m wiretest.Msg) {
 		d := req.decoder()
 		id, _ := d.Uint()
 		f.ifaces[id] = "river_xkb_keymap_v1"
+	case iface == "river_libinput_device_v1" && m.Opcode != 0: // any setter (0 = destroy)
+		// Every set_* request's first argument is a new river_libinput_result_v1.
+		d := req.decoder()
+		id, _ := d.Uint()
+		f.ifaces[id] = "river_libinput_result_v1"
 	case iface == "wl_registry" && m.Opcode == 0:
 		// bind: record the new object's interface.
 		d := req.decoder()
