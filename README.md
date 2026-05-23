@@ -15,6 +15,11 @@ not yet written. See [PLAN.md](PLAN.md) for the design and roadmap.
 | Path | What |
 | --- | --- |
 | `core/` | The window-management state machine: model, layouts, commands. Pure Go, no Wayland imports, fully unit-tested. |
+| `wire/` | Pure-Go Wayland client wire protocol: connection, marshalling, fd passing, object lifetime, and the hand-written `wl_display`/`wl_registry`/`wl_callback` bootstrap. No cgo. |
+| `wire/wiretest/` | A fake compositor speaking the raw wire format over a socketpair, for testing protocol code without river. |
+| `protocol/` | Vendored protocol XML (wayland core + river's six extensions). |
+| `protocols/wl/`, `protocols/river/` | Generated typed bindings. Regenerate with `go generate ./...`. |
+| `internal/gen/` | The protocol code generator. |
 | `cmd/wmsim/` | ASCII simulator: replay a script of events and commands against the core and render the resulting layout. |
 | `example/` | wmsim scenario scripts. |
 

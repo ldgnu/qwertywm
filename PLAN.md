@@ -171,7 +171,7 @@ Each milestone ends in something runnable and tested.
 - [x] **M1 — `core/`**: geometry, layouts, model, arrangement, command
       dispatcher; unit tests, property tests; `cmd/wmsim` ASCII simulator
       that replays a script of events/commands and renders the layout.
-- [ ] **M2 — wire + codegen**: pure-Go Wayland client connection
+- [x] **M2 — wire + codegen**: pure-Go Wayland client connection
       (`wire/`) and a generator that produces typed bindings from river's
       six protocol XML files (`internal/gen/`).
 - [ ] **M3 — `bridge/`**: connect to river, implement the manage/render
