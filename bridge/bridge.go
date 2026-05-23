@@ -730,14 +730,26 @@ func (b *Bridge) applyRenderState() {
 		if !p.Visible {
 			continue
 		}
-		// Position.
+		// Position. A tiled window that took a smaller size than its slot
+		// (terminal cell snapping, stubborn clients) is centered within
+		// the slot so the remainder is split evenly around it instead of
+		// accumulating at the bottom right.
 		if ws.node == nil {
 			ws.node = ws.proxy.GetNode()
 		}
-		if !ws.posSent || p.Rect.X != ws.posX || p.Rect.Y != ws.posY {
-			ws.node.SetPosition(p.Rect.X, p.Rect.Y)
+		x, y := p.Rect.X, p.Rect.Y
+		if w := b.model.Windows[id]; w != nil && !w.Floating && p.Fullscreen == 0 {
+			if w.ActualW > 0 && w.ActualW < p.Rect.W {
+				x += (p.Rect.W - w.ActualW) / 2
+			}
+			if w.ActualH > 0 && w.ActualH < p.Rect.H {
+				y += (p.Rect.H - w.ActualH) / 2
+			}
+		}
+		if !ws.posSent || x != ws.posX || y != ws.posY {
+			ws.node.SetPosition(x, y)
 			ws.posSent = true
-			ws.posX, ws.posY = p.Rect.X, p.Rect.Y
+			ws.posX, ws.posY = x, y
 		}
 		// Borders.
 		if !ws.borderSent || p.Border != ws.border {

@@ -90,8 +90,13 @@ type WindowSnapshot struct {
 	Y         int32    `json:"y"`
 	Width     int32    `json:"width"`
 	Height    int32    `json:"height"`
-	Visible   bool     `json:"visible"`
-	Focused   bool     `json:"focused"`
+	// ActualWidth/Height are the dimensions the client most recently
+	// reported, which may differ from the assigned Width/Height (terminal
+	// cell snapping, fixed-size windows). Zero until first reported.
+	ActualWidth  int32 `json:"actual_width,omitempty"`
+	ActualHeight int32 `json:"actual_height,omitempty"`
+	Visible      bool  `json:"visible"`
+	Focused      bool  `json:"focused"`
 }
 
 // colorString renders a color the same way the set command accepts it.
@@ -162,23 +167,25 @@ func (m *Model) Snapshot() Snapshot {
 		w := m.Windows[id]
 		p := arr.Placements[id]
 		s.Windows = append(s.Windows, WindowSnapshot{
-			ID:         id,
-			AppID:      w.AppID,
-			Title:      w.Title,
-			Workspace:  w.Workspace,
-			Floating:   w.Floating,
-			Fullscreen: w.FullscreenOn != 0,
-			Parent:     w.Parent,
-			MinWidth:   w.MinW,
-			MinHeight:  w.MinH,
-			MaxWidth:   w.MaxW,
-			MaxHeight:  w.MaxH,
-			X:          p.Rect.X,
-			Y:          p.Rect.Y,
-			Width:      p.Rect.W,
-			Height:     p.Rect.H,
-			Visible:    p.Visible,
-			Focused:    p.Focused,
+			ID:           id,
+			AppID:        w.AppID,
+			Title:        w.Title,
+			Workspace:    w.Workspace,
+			Floating:     w.Floating,
+			Fullscreen:   w.FullscreenOn != 0,
+			Parent:       w.Parent,
+			MinWidth:     w.MinW,
+			MinHeight:    w.MinH,
+			MaxWidth:     w.MaxW,
+			MaxHeight:    w.MaxH,
+			X:            p.Rect.X,
+			Y:            p.Rect.Y,
+			Width:        p.Rect.W,
+			Height:       p.Rect.H,
+			ActualWidth:  w.ActualW,
+			ActualHeight: w.ActualH,
+			Visible:      p.Visible,
+			Focused:      p.Focused,
 		})
 	}
 
