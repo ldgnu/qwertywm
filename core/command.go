@@ -49,6 +49,7 @@ func init() {
 		{"toggle-fullscreen", "toggle-fullscreen", "toggle fullscreen for the focused window", cmdToggleFullscreen},
 		{"workspace-mode", "workspace-mode independent|locked", "set how workspaces map to outputs", cmdWorkspaceMode},
 		{"get", "get state|outputs|windows|workspaces", "query weir state as JSON", cmdGet},
+		{"exit", "exit", "end the Wayland session", cmdExit},
 		{"help", "help [command]", "list commands or show usage for one", cmdHelp},
 	}
 	sort.Slice(commands, func(i, j int) bool { return commands[i].name < commands[j].name })
@@ -615,6 +616,11 @@ func cmdGet(m *Model, args []string) (string, error) {
 		return "", fmt.Errorf("marshal state: %w", err)
 	}
 	return string(b), nil
+}
+
+func cmdExit(m *Model, _ []string) (string, error) {
+	m.ExitRequested = true
+	return "", nil
 }
 
 func cmdHelp(_ *Model, args []string) (string, error) {

@@ -57,6 +57,15 @@ type Bridge struct {
 
 	// Unavailable is set if the compositor sent the unavailable event.
 	unavailable bool
+	// exiting is set once exit_session has been sent; the connection
+	// dropping afterwards is expected rather than an error.
+	exiting bool
+
+	// OnStateChange, if set, is called on the bridge goroutine at the end
+	// of every manage sequence — the point at which a new window
+	// management state has been handed to the compositor. The IPC layer
+	// uses it to broadcast state snapshots to subscribers.
+	OnStateChange func()
 }
 
 // windowState is the bridge's per-window protocol bookkeeping: the proxies
@@ -397,6 +406,10 @@ func (b *Bridge) manage() {
 	}
 
 	b.wm.ManageFinish()
+
+	if b.OnStateChange != nil {
+		b.OnStateChange()
+	}
 }
 
 // applyWindowManageState sends the window-management half of a placement:
@@ -587,13 +600,19 @@ func (b *Bridge) Run(cmds <-chan Command) error {
 		select {
 		case p := <-packets:
 			if err := b.conn.Feed(p); err != nil {
+				if b.exiting {
+					return nil
+				}
 				return err
 			}
 			if _, err := b.conn.DispatchPending(); err != nil {
+				if b.exiting {
+					return nil
+				}
 				return err
 			}
 		case cmd := <-cmds:
-			out, err := b.model.Dispatch(cmd.Args)
+			out, err := b.runCommand(cmd.Args)
 			cmd.Reply <- CommandResult{Output: out, Err: err}
 			if b.model.Changed() {
 				b.Dirty()
@@ -606,6 +625,20 @@ func (b *Bridge) Run(cmds <-chan Command) error {
 			return err
 		}
 	}
+}
+
+// runCommand executes a command on the bridge goroutine and carries out
+// any protocol-level actions the command requested of the bridge.
+func (b *Bridge) runCommand(args []string) (string, error) {
+	out, err := b.model.Dispatch(args)
+	if b.model.ExitRequested && !b.exiting {
+		// End the entire Wayland session. The compositor will disconnect
+		// every client including weir; the run loop then returns cleanly.
+		b.log.Info("exiting session by request")
+		b.exiting = true
+		b.wm.ExitSession()
+	}
+	return out, err
 }
 
 // Command is a request to run a core command on the bridge's goroutine.

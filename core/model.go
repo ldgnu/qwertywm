@@ -118,6 +118,10 @@ type Model struct {
 	// compositor reports it closed.
 	CloseRequests []WindowID
 
+	// ExitRequested is set by the exit command. The bridge responds by
+	// asking the compositor to end the Wayland session.
+	ExitRequested bool
+
 	// changed is set by any mutation and consumed by the bridge to decide
 	// whether a manage_dirty request is needed.
 	changed bool

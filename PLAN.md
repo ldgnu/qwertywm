@@ -179,11 +179,13 @@ Each milestone ends in something runnable and tested.
       a fake river compositor that enforces the protocol's sequencing rules;
       not yet run against a real river (no zig/wlroots in the dev container
       — see M5).
-- [ ] **M4 — IPC + `weirctl`**: socket server, command/query/subscribe,
+- [x] **M4 — IPC + `weirctl`**: socket server, command/query/subscribe,
       CLI. Everything drivable and inspectable from the shell.
 - [ ] **M5 — headless integration harness**: run river headless in CI,
       spawn test clients, assert via `weirctl`. Output hotplug tests using
-      headless virtual outputs.
+      headless virtual outputs. (Partially done: scripts/integration-test.sh
+      asserts 14 weirctl-driven checks against a real headless river;
+      remaining work is CI wiring and multi-output coverage.)
 - [ ] **M6 — input**: keyboard bindings (`river-xkb-bindings-v1`), pointer
       bindings + interactive move/resize (`op_start_pointer`), focus follows
       interaction policy.

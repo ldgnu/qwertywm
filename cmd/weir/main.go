@@ -10,6 +10,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/psanford/weir/bridge"
 	"github.com/psanford/weir/core"
+	"github.com/psanford/weir/ipc"
 	"github.com/psanford/weir/wire"
 )
 
@@ -26,6 +28,7 @@ var version = "0.1.0-dev"
 func main() {
 	logLevel := flag.String("log-level", "info", "log level: debug, info, warn, error")
 	showVersion := flag.Bool("version", false, "print the version and exit")
+	socket := flag.String("socket", "", "control socket path (default: derived from the environment)")
 	flag.Parse()
 
 	if *showVersion {
@@ -41,13 +44,27 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
 	slog.SetDefault(logger)
 
-	if err := run(logger); err != nil {
+	if err := run(logger, *socket); err != nil {
 		logger.Error("fatal", "err", err)
 		os.Exit(1)
 	}
 }
 
-func run(logger *slog.Logger) error {
+// commandClient adapts the IPC server's Handler interface to the bridge's
+// command channel: each command is shipped to the bridge goroutine and the
+// caller blocks until it has been executed there.
+type commandClient struct {
+	cmds chan<- bridge.Command
+}
+
+func (c *commandClient) Command(args []string) (string, error) {
+	reply := make(chan bridge.CommandResult, 1)
+	c.cmds <- bridge.Command{Args: args, Reply: reply}
+	res := <-reply
+	return res.Output, res.Err
+}
+
+func run(logger *slog.Logger, socketOverride string) error {
 	conn, err := wire.Connect()
 	if err != nil {
 		return err
@@ -62,11 +79,35 @@ func run(logger *slog.Logger) error {
 		}
 		return fmt.Errorf("bootstrap: %w", err)
 	}
-	logger.Info("weir started", "version", version)
 
-	// The command channel is wired up to the IPC socket in a future
-	// milestone; until then the bridge is driven entirely by the
-	// compositor.
+	// Control socket. Commands arriving on it are executed on the bridge
+	// goroutine via the command channel; state changes are broadcast to
+	// subscribers from the bridge goroutine after each manage sequence.
+	socketPath := socketOverride
+	if socketPath == "" {
+		socketPath, err = ipc.SocketPath()
+		if err != nil {
+			return err
+		}
+	}
 	cmds := make(chan bridge.Command)
+	srv, err := ipc.Listen(socketPath, &commandClient{cmds: cmds}, logger)
+	if err != nil {
+		return err
+	}
+	defer srv.Close()
+	b.OnStateChange = func() {
+		if !srv.HasSubscribers() {
+			return
+		}
+		line, err := json.Marshal(ipc.Event{Event: "state", State: model.Snapshot()})
+		if err != nil {
+			logger.Error("marshal state event", "err", err)
+			return
+		}
+		srv.Broadcast(append(line, '\n'))
+	}
+
+	logger.Info("weir started", "version", version)
 	return b.Run(cmds)
 }

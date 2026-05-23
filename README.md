@@ -16,7 +16,9 @@ not yet written. See [PLAN.md](PLAN.md) for the design and roadmap.
 | --- | --- |
 | `core/` | The window-management state machine: model, layouts, commands. Pure Go, no Wayland imports, fully unit-tested. |
 | `bridge/` | The river protocol adapter: owns the manage/render sequence loop and translates between protocol events and the core model. Tested against a fake compositor that enforces the protocol's sequencing rules. |
+| `ipc/` | The control socket: newline-delimited JSON over a unix socket. Commands, queries, and a state-change subscription stream for bars. |
 | `cmd/weir/` | The window manager binary. Start it from river's init script. |
+| `cmd/weirctl/` | The CLI: `weirctl focus next`, `weirctl get state`, `weirctl subscribe`, `weirctl help`. |
 | `wire/` | Pure-Go Wayland client wire protocol: connection, marshalling, fd passing, object lifetime, and the hand-written `wl_display`/`wl_registry`/`wl_callback` bootstrap. No cgo. |
 | `wire/wiretest/` | A fake compositor speaking the raw wire format over a socketpair, for testing protocol code without river. |
 | `protocol/` | Vendored protocol XML (wayland core + river's six extensions). |
@@ -41,10 +43,11 @@ that fails the test if a request is ever sent in an illegal protocol phase.
 
 ### Against a real river
 
-`scripts/smoke-test.sh` runs weir inside a real headless river (wlroots
-headless backend + pixman renderer — no GPU, no display, no seat), opens
-three terminals, and verifies they all map. `scripts/screenshot-test.sh`
-does the same and captures a PNG of the tiled layout via grim.
+`scripts/integration-test.sh` runs weir inside a real headless river
+(wlroots headless backend + pixman renderer — no GPU, no display, no seat),
+opens terminals, drives weir with `weirctl`, and asserts on the JSON state
+it reports. `scripts/smoke-test.sh` is a faster log-based check and
+`scripts/screenshot-test.sh` captures a PNG of the tiled layout via grim.
 
 ```sh
 eval "$(scripts/fetch-river.sh)"   # sets $RIVER and $FOOT from the nix cache
