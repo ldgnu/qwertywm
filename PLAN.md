@@ -215,6 +215,23 @@ they block daily use.
 
 ### Behavioral rough edges
 
+- **gcr-prompter (and possibly other dialogs) does not auto-float.** It
+  floated under river-classic via the fixed-size check at map time
+  (river-classic XdgToplevel.zig: `min != 0 && (min_w == max_w || min_h ==
+  max_h)` => float). weir implements the same heuristic on the
+  dimensions_hint event (core/model.go WindowDimensionsHint), with the
+  displayed-window guard already removed, and the window still tiles.
+  Workaround: `rule add -app-id '*rompter*' float`.
+  Next diagnostic step: with the prompt on screen, run
+  `weirctl get windows | jq '.[] | {app_id, floating, parent, min_width,
+  max_width, min_height, max_height}'`.
+  Hypotheses, in order: (a) the client never declares min == max on this
+  system, so no heuristic can catch it and river-classic floated it some
+  other way (Xwayland window-type heuristics that the new protocol does not
+  expose?); (b) river never emits the dimensions_hint event for a hint set
+  in the same commit as the first buffer; (c) the bridge drops or
+  misorders the hint event.
+
 - focus-follows-cursor also raises the hovered window within its group
   (focus and stacking are coupled); hovering across overlapping floating
   windows shuffles their z-order.
