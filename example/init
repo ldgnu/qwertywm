@@ -5,12 +5,10 @@
 # There is no config file: this script *is* the configuration, exactly like
 # river-classic. Re-run any weirctl command at any time to change things.
 
-# Start the window manager.
+# Start the window manager and wait for its control socket to come up
+# before configuring it.
 weir &
-
-# Give it a moment to take the window manager role and open its control
-# socket before configuring it.
-# weirctl retries the connection briefly, so no sleep is needed here.
+weirctl wait-for-socket
 
 # --- appearance -------------------------------------------------------------
 weirctl set border-width 2

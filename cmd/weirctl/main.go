@@ -3,10 +3,11 @@
 //
 // Usage:
 //
-//	weirctl <command> [args...]   run a weir command
-//	weirctl get state             print the full state as JSON
-//	weirctl subscribe             stream state-change events as JSON lines
-//	weirctl help                  list available commands
+//	weirctl <command> [args...]        run a weir command
+//	weirctl get state                  print the full state as JSON
+//	weirctl subscribe                  stream state-change events as JSON lines
+//	weirctl wait-for-socket [seconds]  block until weir's socket is up
+//	weirctl help                       list available commands
 //
 // The socket is found via $WEIRSOCK or derived from $WAYLAND_DISPLAY; pass
 // -socket to override.
@@ -20,6 +21,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/psanford/weir/ipc"
@@ -47,7 +49,12 @@ func main() {
 			fatal(err)
 		}
 	}
-	conn, err := dialWithRetry(path)
+	if len(args) >= 1 && args[0] == "wait-for-socket" {
+		waitForSocket(path, args[1:])
+		return
+	}
+
+	conn, err := net.Dial("unix", path)
 	if err != nil {
 		fatal(fmt.Errorf("connecting to weir at %s: %w (is weir running?)", path, err))
 	}
@@ -97,20 +104,32 @@ func subscribe(conn net.Conn) {
 	}
 }
 
-// dialWithRetry connects to the control socket, retrying for a short period
-// if weir has not created it yet. This lets init scripts run weirctl
-// immediately after starting weir without a sleep.
-func dialWithRetry(path string) (net.Conn, error) {
-	deadline := time.Now().Add(3 * time.Second)
+// waitForSocket blocks until weir's control socket accepts a connection or
+// the timeout expires. Use it in init scripts between starting weir and the
+// first configuration command. Every other weirctl invocation fails
+// immediately if weir is not running.
+func waitForSocket(path string, args []string) {
+	timeout := 5 * time.Second
+	if len(args) == 1 {
+		secs, err := strconv.ParseFloat(args[0], 64)
+		if err != nil || secs <= 0 {
+			fatal(fmt.Errorf("invalid timeout %q (want seconds)", args[0]))
+		}
+		timeout = time.Duration(secs * float64(time.Second))
+	} else if len(args) > 1 {
+		fatal(fmt.Errorf("usage: weirctl wait-for-socket [timeout-seconds]"))
+	}
+	deadline := time.Now().Add(timeout)
 	for {
 		conn, err := net.Dial("unix", path)
 		if err == nil {
-			return conn, nil
+			conn.Close()
+			return
 		}
 		if time.Now().After(deadline) {
-			return nil, err
+			fatal(fmt.Errorf("timed out after %v waiting for weir at %s: %w", timeout, path, err))
 		}
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 	}
 }
 
