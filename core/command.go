@@ -51,6 +51,7 @@ func init() {
 		{"resize", "resize horizontal|vertical <px>", "grow or shrink the focused window (floating it if tiled)", cmdResize},
 		{"toggle-float", "toggle-float", "toggle floating for the focused window", cmdToggleFloat},
 		{"toggle-fullscreen", "toggle-fullscreen", "toggle fullscreen for the focused window", cmdToggleFullscreen},
+		{"rule", "rule add|del [-app-id <glob>] [-title <glob>] <action> | rule list", "manage window rules (float|no-float|ssd|csd|workspace <ws>)", cmdRule},
 		{"workspace-mode", "workspace-mode independent|locked", "set how workspaces map to outputs", cmdWorkspaceMode},
 		{"bind", "bind <mods+key> <command...>", "bind a key chord to a command", cmdBind},
 		{"unbind", "unbind <mods+key>", "remove a key binding", cmdUnbind},

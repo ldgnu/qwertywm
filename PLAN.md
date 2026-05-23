@@ -202,12 +202,6 @@ they block daily use.
 
 ### Missing features that block a normal desktop setup
 
-- **Status bar integration.** river 0.4 removed `river-status-unstable-v1`,
-  so waybar's built-in river module does not work at all. The replacement is
-  a custom waybar module (or any bar) fed by `weirctl subscribe` /
-  `weirctl get state`; weir should ship a small example.
-- **Window rules.** No `rule add -app-id mpv float` equivalent. Float, CSD,
-  and workspace-assignment rules keyed on app-id/title.
 - **Per-keyboard layouts.** Needed: at least one user runs two keyboards
   with different layouts simultaneously, which is exactly what
   `river-xkb-config-v1` exists for (each physical keyboard gets its own

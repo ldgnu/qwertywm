@@ -587,8 +587,12 @@ func (b *Bridge) applyWindowManageState(ws *windowState, p core.Placement) {
 
 	// Decoration mode: ask for server-side decorations whenever the window
 	// supports them so clients don't draw their own title bars inside a
-	// tiled layout. Windows that only support CSD keep CSD.
+	// tiled layout. Windows that only support CSD keep CSD. A window rule
+	// overrides both.
 	wantSSD := ws.decorationHint != river.WindowV1DecorationHintOnlySupportsCsd
+	if w := b.model.Windows[ws.id]; w != nil && w.DecorationOverride != "" {
+		wantSSD = w.DecorationOverride == "ssd"
+	}
 	if !ws.ssdSent || wantSSD != ws.ssd {
 		if wantSSD {
 			ws.proxy.UseSsd()

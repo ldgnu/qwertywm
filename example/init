@@ -68,3 +68,8 @@ weirctl bind-pointer $mod+Right resize
 # Anything else you want running: bars, wallpaper, idle daemons...
 # waybar &
 # swaybg -i ~/wallpaper.png &
+
+# --- window rules -----------------------------------------------------------
+# weirctl rule add -app-id 'float*' float
+# weirctl rule add -app-id mpv float
+# weirctl rule add -app-id Slack workspace 9

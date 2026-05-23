@@ -49,6 +49,12 @@ type Window struct {
 	// FullscreenOn is the output the window is fullscreen on, or 0.
 	FullscreenOn OutputID
 
+	// DecorationOverride forces server-side ("ssd") or client-side ("csd")
+	// decorations regardless of the client's preference. Empty means the
+	// bridge decides from the client's decoration hint. Set by window
+	// rules.
+	DecorationOverride string
+
 	// Dimension hints from the client. 0 = no preference.
 	MinW, MinH, MaxW, MaxH int32
 
@@ -161,6 +167,9 @@ type Model struct {
 
 	// PointerBindings are the pointer-button bindings, keyed by chord.
 	PointerBindings map[pointerBindingKey]PointerBinding
+
+	// Rules are the window rules, applied in order to new windows.
+	Rules []Rule
 
 	// op is the interactive pointer move/resize in progress, or nil.
 	op *pointerOp
@@ -508,6 +517,7 @@ func (m *Model) WindowClosed(id WindowID) {
 func (m *Model) WindowAppID(id WindowID, appID string) {
 	if w, ok := m.Windows[id]; ok && w.AppID != appID {
 		w.AppID = appID
+		m.applyRules(w)
 		m.markChanged()
 	}
 }
@@ -516,6 +526,7 @@ func (m *Model) WindowAppID(id WindowID, appID string) {
 func (m *Model) WindowTitle(id WindowID, title string) {
 	if w, ok := m.Windows[id]; ok && w.Title != title {
 		w.Title = title
+		m.applyRules(w)
 		m.markChanged()
 	}
 }
@@ -532,6 +543,9 @@ func (m *Model) WindowParent(id WindowID, parent WindowID) {
 	if parent != 0 && !w.Floating {
 		m.setFloating(w, true)
 	}
+	// Rules run after the dialog auto-float so an explicit no-float rule
+	// can override it.
+	m.applyRules(w)
 	m.markChanged()
 }
 
