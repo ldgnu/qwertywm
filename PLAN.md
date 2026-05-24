@@ -254,6 +254,19 @@ they block daily use.
   (capabilities advertise fullscreen only, so compliant clients hide those
   buttons).
 
+### Known upstream issues (not weir bugs, but weir users will hit them)
+
+- **Screens blanked by swayidle never come back on** (river 0.4 / wlroots
+  0.20). `wlopm --off X; sleep 5; wlopm --on X` reproduces it with no idle
+  daemon involved; `wlr-randr --off/--on` fails the same way. River 0.4
+  routes output power changes through a window manager transaction
+  (OutputManager.zig handlePowerManagerSetMode) and the panel never
+  re-powers after the transaction completes. Worked on river 0.3 / wlroots
+  0.18. Workaround: lock without blanking (`timeout N 'swaylock ...'`);
+  recover a stuck screen with a VT switch.
+- **xdg-activation is not forwarded to window managers** (detailed in the
+  blocked-on-river section above).
+
 ### Untested territory
 
 - Xwayland windows (override-redirect popups, position hints).
