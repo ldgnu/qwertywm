@@ -107,6 +107,11 @@ type Bridge struct {
 	// exiting is set once exit_session has been sent; the connection
 	// dropping afterwards is expected rather than an error.
 	exiting bool
+	// sessionLocked is true while an ext-session-lock client (swaylock)
+	// holds the session. The lock surface has keyboard focus for the
+	// duration, so weir's focus requests would be ignored; focus must be
+	// re-asserted once the session unlocks.
+	sessionLocked bool
 
 	// OnStateChange, if set, is called on the bridge goroutine at the end
 	// of every manage sequence — the point at which a new window
@@ -317,8 +322,18 @@ func (b *Bridge) installWMHandlers() {
 	b.wm.OnSeat = func(s *river.SeatV1) { b.addSeat(s) }
 	b.wm.OnManageStart = func() { b.manage() }
 	b.wm.OnRenderStart = func() { b.render() }
-	b.wm.OnSessionLocked = func() { b.log.Debug("session locked") }
-	b.wm.OnSessionUnlocked = func() { b.log.Debug("session unlocked") }
+	b.wm.OnSessionLocked = func() {
+		b.log.Debug("session locked")
+		b.sessionLocked = true
+	}
+	b.wm.OnSessionUnlocked = func() {
+		b.log.Debug("session unlocked")
+		b.sessionLocked = false
+		// The lock surface held keyboard focus; force the manage sequence
+		// that follows this event to re-assert focus on the focused
+		// window rather than assuming the last focus request still holds.
+		b.focusSent = false
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -595,10 +610,11 @@ func (b *Bridge) manage() {
 		b.applyWindowManageState(ws, p)
 	}
 
-	// Keyboard focus. While a layer surface holds focus the compositor
-	// ignores these requests anyway; skip them so the diffing state stays
-	// accurate and focus is re-asserted once the layer surface lets go.
-	if b.seat != nil && !b.layerFocus {
+	// Keyboard focus. While a layer surface or the session lock holds
+	// focus the compositor ignores these requests anyway; skip them so the
+	// diffing state stays accurate and focus is re-asserted once focus is
+	// available again.
+	if b.seat != nil && !b.layerFocus && !b.sessionLocked {
 		focus := b.arrangement.Focus
 		if focus != b.lastFocus || !b.focusSent {
 			if ws, ok := b.windows[focus]; ok && focus != 0 {

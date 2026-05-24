@@ -264,7 +264,6 @@ they block daily use.
   be re-registered. Making restarts lossless needs the window `identifier`
   event (protocol v4, designed for exactly this) plus serializing the
   model to disk on exit and matching windows back up on startup.
-- Session lock interaction (weir logs the events and otherwise ignores them).
 - Real multi-monitor hardware (mixed scale factors in particular).
 
 ### By design
