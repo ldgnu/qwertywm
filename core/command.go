@@ -561,7 +561,7 @@ func applyLayoutSpec(ws *Workspace, spec string) {
 // surface is discoverable from the command line.
 const setUsage = `usage: set <option> <value...>
 
-layout (per workspace):
+layout (absolute values apply to every workspace; +/- to the focused one):
   main-ratio <r|+d|-d>             main area fraction of the output (0.1-0.9)
   main-count <n|+d|-d>             number of windows in the main area
   main-location left|right|top|bottom
@@ -579,6 +579,24 @@ appearance:
 behavior:
   focus-follows-cursor on|off`
 
+// applyParams mutates the layout parameters everywhere an absolute set
+// should reach: the default for new workspaces and every existing
+// workspace.
+func (m *Model) applyParams(f func(*LayoutParams)) {
+	f(&m.DefaultParams)
+	m.DefaultParams = m.DefaultParams.Clamp()
+	for _, ws := range m.Workspaces {
+		f(&ws.Params)
+		ws.Params = ws.Params.Clamp()
+	}
+}
+
+// isRelative reports whether a set value is a +/- adjustment rather than an
+// absolute value.
+func isRelative(s string) bool {
+	return strings.HasPrefix(s, "+") || strings.HasPrefix(s, "-")
+}
+
 func cmdSet(m *Model, args []string) (string, error) {
 	if len(args) < 1 {
 		return "", cmdErrf("%s", setUsage)
@@ -590,62 +608,72 @@ func cmdSet(m *Model, args []string) (string, error) {
 		if len(vals) != 1 {
 			return "", cmdErrf("usage: set main-ratio <ratio|+delta|-delta>")
 		}
-		if ws == nil {
-			return "", cmdErrf("no focused workspace")
+		if isRelative(vals[0]) {
+			if ws == nil {
+				return "", cmdErrf("no focused workspace")
+			}
+			v, err := parseAdjustFloat(vals[0], ws.Params.MainRatio)
+			if err != nil {
+				return "", err
+			}
+			ws.Params.MainRatio = v
+			ws.Params = ws.Params.Clamp()
+		} else {
+			v, err := strconv.ParseFloat(vals[0], 64)
+			if err != nil {
+				return "", cmdErrf("invalid value %q", vals[0])
+			}
+			m.applyParams(func(p *LayoutParams) { p.MainRatio = v })
 		}
-		v, err := parseAdjustFloat(vals[0], ws.Params.MainRatio)
-		if err != nil {
-			return "", err
-		}
-		ws.Params.MainRatio = v
-		ws.Params = ws.Params.Clamp()
 	case "main-count":
 		if len(vals) != 1 {
 			return "", cmdErrf("usage: set main-count <n|+delta|-delta>")
 		}
-		if ws == nil {
-			return "", cmdErrf("no focused workspace")
+		if isRelative(vals[0]) {
+			if ws == nil {
+				return "", cmdErrf("no focused workspace")
+			}
+			v, err := parseAdjustInt(vals[0], ws.Params.MainCount)
+			if err != nil {
+				return "", err
+			}
+			ws.Params.MainCount = v
+			ws.Params = ws.Params.Clamp()
+		} else {
+			v, err := strconv.Atoi(vals[0])
+			if err != nil {
+				return "", cmdErrf("invalid value %q", vals[0])
+			}
+			m.applyParams(func(p *LayoutParams) { p.MainCount = v })
 		}
-		v, err := parseAdjustInt(vals[0], ws.Params.MainCount)
-		if err != nil {
-			return "", err
-		}
-		ws.Params.MainCount = v
-		ws.Params = ws.Params.Clamp()
 	case "main-location":
 		if len(vals) != 1 {
 			return "", cmdErrf("usage: set main-location left|right|top|bottom")
-		}
-		if ws == nil {
-			return "", cmdErrf("no focused workspace")
 		}
 		loc, err := ParseMainLocation(vals[0])
 		if err != nil {
 			return "", cmdErrf("%v", err)
 		}
-		ws.Params.MainLocation = loc
+		m.applyParams(func(p *LayoutParams) { p.MainLocation = loc })
 	case "gaps":
 		if len(vals) != 2 {
 			return "", cmdErrf("usage: set gaps <inner> <outer>")
-		}
-		if ws == nil {
-			return "", cmdErrf("no focused workspace")
 		}
 		inner, err1 := strconv.ParseInt(vals[0], 10, 32)
 		outer, err2 := strconv.ParseInt(vals[1], 10, 32)
 		if err1 != nil || err2 != nil || inner < 0 || outer < 0 {
 			return "", cmdErrf("gaps must be non-negative integers")
 		}
-		ws.Params.InnerGap = int32(inner)
-		ws.Params.OuterGap = int32(outer)
+		m.applyParams(func(p *LayoutParams) {
+			p.InnerGap = int32(inner)
+			p.OuterGap = int32(outer)
+		})
 	case "smart-gaps":
 		if len(vals) != 1 || (vals[0] != "on" && vals[0] != "off") {
 			return "", cmdErrf("usage: set smart-gaps on|off")
 		}
-		if ws == nil {
-			return "", cmdErrf("no focused workspace")
-		}
-		ws.Params.SmartGaps = vals[0] == "on"
+		on := vals[0] == "on"
+		m.applyParams(func(p *LayoutParams) { p.SmartGaps = on })
 	case "border-width":
 		if len(vals) != 1 {
 			return "", cmdErrf("usage: set border-width <px>")

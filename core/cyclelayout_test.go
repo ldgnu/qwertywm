@@ -33,10 +33,12 @@ func TestCycleLayout(t *testing.T) {
 		t.Fatalf("from outside the list: layout=%v, want monocle (first entry)", ws.Layout)
 	}
 
-	// The cycle is per workspace.
+	// The cycle is per workspace: the other workspace keeps the
+	// main-location from the (global) set rather than following the
+	// cycle that ran on this one.
 	run(t, m, "focus-output", "right")
-	if got := currentLayoutSpec(m.focusedWorkspace()); got != "left" {
-		t.Errorf("other workspace was affected: %q", got)
+	if got := currentLayoutSpec(m.focusedWorkspace()); got != "right" {
+		t.Errorf("cycle-layout leaked to another workspace: %q", got)
 	}
 
 	// Errors.

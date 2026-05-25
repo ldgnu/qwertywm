@@ -91,11 +91,20 @@ func (m *Model) Arrange() Arrangement {
 		usable := out.Usable()
 		rects := ComputeLayout(ws.Layout, usable, len(tiled), ws.Params)
 		smartBorderless := m.Borders.SmartBorders && len(tiled) == 1 && len(fullscreen) == 0
+		// The compositor draws borders outside the window's content
+		// rectangle, so each window's content must be inset by the border
+		// width within its slot or the outermost borders land outside the
+		// usable area (off screen, or hidden under a bar's exclusive
+		// zone).
+		borderInset := m.Borders.Width
+		if smartBorderless {
+			borderInset = 0
+		}
 		for i, id := range tiled {
 			p := arr.Placements[id]
 			p.Visible = true
-			p.Rect = rects[i]
 			p.Tiled = tiledEdges(rects[i], rects, usable)
+			p.Rect = insetForBorder(rects[i], borderInset)
 			if !smartBorderless {
 				p.Border = m.borderFor(ws, indexOf(ws.Windows, id))
 			}
@@ -223,6 +232,17 @@ func anyAdjacent(all []Rect, r Rect, edge Edges) bool {
 
 func spansOverlap(a, alen, b, blen int32) bool {
 	return a < b+blen && b < a+alen
+}
+
+// insetForBorder shrinks a tile slot by the border width on every edge so
+// the compositor-drawn border (which extends outward from the content
+// rectangle) fits within the slot. Slots too small to inset are left
+// unchanged rather than collapsing to nothing.
+func insetForBorder(slot Rect, width int32) Rect {
+	if width <= 0 || slot.W <= 2*width || slot.H <= 2*width {
+		return slot
+	}
+	return slot.Inset(width)
 }
 
 // raiseToTop returns ids with the given id moved to the end (the top of the

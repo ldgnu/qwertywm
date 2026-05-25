@@ -37,9 +37,10 @@ weirctl set smart-gaps on          # no gaps when only one window is tiled
 # ---------------------------------------------------------------------------
 # Layout
 # ---------------------------------------------------------------------------
-# The tile layout is xmonad-style master/stack. All layout settings are per
-# workspace; these set the defaults for the currently focused workspace and
-# new workspaces inherit the built-in defaults.
+# The tile layout is xmonad-style master/stack. Layout settings are kept
+# per workspace: an absolute value here applies to every workspace (and to
+# ones created later), while the +/- adjustment forms used in the
+# keybindings below change only the focused workspace.
 weirctl set main-ratio 0.6                   # main area fraction (0.1-0.9)
 weirctl set main-count 1                     # windows in the main area
 weirctl set main-location left               # left|right|top|bottom

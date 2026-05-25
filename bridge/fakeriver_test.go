@@ -231,6 +231,9 @@ type fakeRiver struct {
 func newFakeRiver(t *testing.T) (*fakeRiver, *Bridge) {
 	conn, server := wiretest.Pair(t)
 	model := core.NewModel()
+	// Geometry assertions in the bridge tests are written against the raw
+	// layout slots; the border inset has its own tests.
+	model.Borders.Width = 0
 	b := New(conn, model, nil)
 	f := &fakeRiver{
 		t:                 t,

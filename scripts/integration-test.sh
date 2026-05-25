@@ -63,15 +63,15 @@ sleep 1
 expect "three windows appear" '.windows | length == 3'
 expect "all windows are visible" '[.windows[].visible] | all'
 expect "the newest window is focused" '.windows[-1].focused == true'
-expect "windows do not overlap (master width is 60% of 1280)" \
-    '.windows[0].width == 768'
+expect "windows do not overlap (master is 60% of 1280 minus the 2px border inset)" \
+    '.windows[0].width == 764'
 
 "$ctl" set main-ratio 0.25 || fail "set main-ratio"
-expect "main-ratio change resizes the master" '.windows[0].width == 320'
+expect "main-ratio change resizes the master" '.windows[0].width == 316'
 
 "$ctl" set-layout monocle || fail "set-layout"
 expect "monocle gives every window the full output" \
-    '[.windows[] | select(.width == 1280 and .height == 720)] | length == 3'
+    '[.windows[] | select(.width == 1276 and .height == 716)] | length == 3'
 "$ctl" set-layout tile || fail "set-layout tile"
 
 "$ctl" focus main || fail "focus main"

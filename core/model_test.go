@@ -19,6 +19,9 @@ func run(t *testing.T, m *Model, args ...string) string {
 // right.
 func twoOutputs() *Model {
 	m := NewModel()
+	// Geometry assertions throughout the tests are written against the
+	// raw layout slots; the border inset is tested separately.
+	m.Borders.Width = 0
 	m.OutputAdded(1, "DP-1", Rect{X: 0, Y: 0, W: 1920, H: 1080})
 	m.OutputAdded(2, "HDMI-A-1", Rect{X: 1920, Y: 0, W: 2560, H: 1440})
 	return m

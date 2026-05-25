@@ -128,6 +128,12 @@ type Model struct {
 	// startup. More are created on demand by view/send.
 	DefaultWorkspaces []string
 
+	// DefaultParams are the layout parameters newly created workspaces
+	// start with. Setting a layout option to an absolute value updates
+	// this along with every existing workspace; relative (+/-) adjustments
+	// touch only the focused workspace.
+	DefaultParams LayoutParams
+
 	// lastShown remembers which workspace each output (by name) was
 	// showing when it was removed, so re-plugging a monitor restores its
 	// workspace rather than assigning an arbitrary hidden one.
@@ -223,6 +229,7 @@ func NewModel() *Model {
 		Outputs:           make(map[OutputID]*Output),
 		Mode:              ModeIndependent,
 		DefaultWorkspaces: names,
+		DefaultParams:     DefaultLayoutParams(),
 		Borders:           DefaultBorders(),
 		Bindings:          make(map[bindingKey]Binding),
 		PointerBindings:   make(map[pointerBindingKey]PointerBinding),
@@ -255,7 +262,7 @@ func (m *Model) ensureWorkspace(name string) *Workspace {
 		Name:   name,
 		Focus:  -1,
 		Layout: LayoutTile,
-		Params: DefaultLayoutParams(),
+		Params: m.DefaultParams,
 	}
 	m.Workspaces[name] = ws
 	return ws
