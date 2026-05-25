@@ -480,10 +480,13 @@ func (m *Model) OutputRemoved(id OutputID) {
 // Window events
 // ---------------------------------------------------------------------------
 
-// WindowAdded records a new window. It is appended to the focused output's
-// current workspace and receives focus there. xmonad inserts new windows at
-// the top of the stack; we append instead so the master is stable, matching
-// river-classic's default. `zoom` promotes a window to master.
+// WindowAdded records a new window. It is inserted at the focused position
+// of the focused output's workspace and receives focus (xmonad's insertUp):
+// the new window takes the focused window's slot and the previously focused
+// window slides one position later. Closing the new window therefore
+// returns both focus and position to the window the user was on, and a
+// window opened while the main slot is focused becomes the new main.
+// `zoom` promotes a window to main; `swap` reorders.
 func (m *Model) WindowAdded(id WindowID) {
 	if _, exists := m.Windows[id]; exists {
 		return
@@ -494,8 +497,16 @@ func (m *Model) WindowAdded(id WindowID) {
 	wsName := m.currentWorkspaceName()
 	ws := m.ensureWorkspace(wsName)
 	w.Workspace = wsName
-	ws.Windows = append(ws.Windows, id)
-	ws.Focus = len(ws.Windows) - 1
+	if ws.Focus >= 0 && ws.Focus < len(ws.Windows) {
+		i := ws.Focus
+		ws.Windows = append(ws.Windows, 0)
+		copy(ws.Windows[i+1:], ws.Windows[i:])
+		ws.Windows[i] = id
+		ws.Focus = i
+	} else {
+		ws.Windows = append(ws.Windows, id)
+		ws.Focus = len(ws.Windows) - 1
+	}
 	m.markChanged()
 }
 

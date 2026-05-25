@@ -167,8 +167,9 @@ func TestPointerBindingMoveOp(t *testing.T) {
 	w1 := f.addWindow()
 	w2 := f.addWindow()
 	f.manageCycle()
-	f.windowDimensions(w1, 600, 600)
-	f.windowDimensions(w2, 400, 600)
+	// w2 (the newer window) holds the main slot, w1 the stack slot.
+	f.windowDimensions(w1, 400, 600)
+	f.windowDimensions(w2, 600, 600)
 	f.renderCycle()
 
 	b.runCommand([]string{"bind-pointer", "Super+Left", "move"})
@@ -190,9 +191,9 @@ func TestPointerBindingMoveOp(t *testing.T) {
 	}
 	f.renderCycle()
 
-	// Pointer enters window 1, then the binding fires.
+	// Pointer enters the main window (w2), then the binding fires.
 	e := &wire.Encoder{}
-	e.PutObject(w1)
+	e.PutObject(w2)
 	f.server.Send(f.seatID, seatEvPointerEnter, e)
 	f.server.Send(pbID, pointerBindingEvPressed, &wire.Encoder{})
 	reqs = f.manageCycle()
@@ -200,7 +201,7 @@ func TestPointerBindingMoveOp(t *testing.T) {
 		t.Fatalf("op_start_pointer not sent: %v", reqs)
 	}
 	// The window became floating and keeps its tiled geometry.
-	mw := b.Model().Windows[1]
+	mw := b.Model().Windows[2]
 	if !mw.Floating || mw.FloatRect != (core.Rect{X: 0, Y: 0, W: 600, H: 600}) {
 		t.Fatalf("window not floating at its tiled rect: floating=%v rect=%v", mw.Floating, mw.FloatRect)
 	}

@@ -63,11 +63,11 @@ sleep 1
 expect "three windows appear" '.windows | length == 3'
 expect "all windows are visible" '[.windows[].visible] | all'
 expect "the newest window is focused" '.windows[-1].focused == true'
-expect "windows do not overlap (master is 60% of 1280 minus the 2px border inset)" \
-    '.windows[0].width == 764'
+expect "the newest window holds the main slot (60% of 1280 minus the 2px border inset)" \
+    '.windows[-1].width == 764'
 
 "$ctl" set main-ratio 0.25 || fail "set main-ratio"
-expect "main-ratio change resizes the master" '.windows[0].width == 316'
+expect "main-ratio change resizes the master" '.windows[-1].width == 316'
 
 "$ctl" set-layout monocle || fail "set-layout"
 expect "monocle gives every window the full output" \
@@ -75,17 +75,17 @@ expect "monocle gives every window the full output" \
 "$ctl" set-layout tile || fail "set-layout tile"
 
 "$ctl" focus main || fail "focus main"
-expect "focus main focuses the first window" '.windows[0].focused == true'
+expect "focus main focuses the main window (the newest)" '.windows[-1].focused == true'
 
 "$ctl" send 5 || fail "send"
 expect "sent window is on workspace 5 and hidden" \
-    '(.windows[0].workspace == "5") and (.windows[0].visible == false)'
+    '(.windows[-1].workspace == "5") and (.windows[-1].visible == false)'
 expect "two windows remain visible" \
     '[.windows[] | select(.visible)] | length == 2'
 
 "$ctl" view 5 || fail "view"
 expect "viewing workspace 5 shows the sent window" \
-    '(.outputs[0].workspace == "5") and (.windows[0].visible == true)'
+    '(.outputs[0].workspace == "5") and (.windows[-1].visible == true)'
 expect "windows on workspace 1 are now hidden" \
     '[.windows[] | select(.visible)] | length == 1'
 

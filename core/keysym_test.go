@@ -109,11 +109,12 @@ func TestPointerOpMove(t *testing.T) {
 	m := twoOutputs()
 	m.WindowAdded(10)
 	m.WindowAdded(11)
-	// Window 10 is tiled as the master at 0,0 1152x1080 (60% of 1920).
-	if !m.StartPointerOp(10, PointerActionMove) {
+	// Stack is [11 10]: window 11 is the main at 0,0 1152x1080 (60% of
+	// 1920).
+	if !m.StartPointerOp(11, PointerActionMove) {
 		t.Fatal("StartPointerOp failed")
 	}
-	w := m.Windows[10]
+	w := m.Windows[11]
 	if !w.Floating {
 		t.Fatal("window did not become floating for the move")
 	}
@@ -134,8 +135,8 @@ func TestPointerOpMove(t *testing.T) {
 		t.Error("op still in progress after EndPointerOp")
 	}
 	// A second op cannot start while one is active.
-	m.StartPointerOp(10, PointerActionMove)
-	if m.StartPointerOp(11, PointerActionMove) {
+	m.StartPointerOp(11, PointerActionMove)
+	if m.StartPointerOp(10, PointerActionMove) {
 		t.Error("second concurrent op started")
 	}
 }

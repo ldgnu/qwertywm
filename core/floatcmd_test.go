@@ -6,9 +6,11 @@ func TestMoveFloatsAndShifts(t *testing.T) {
 	m := twoOutputs()
 	m.WindowAdded(10)
 	m.WindowAdded(11)
-	// Window 11 (focused) is the stack window at 1152,0 768x1080.
+	// Stack is [11 10]; focus window 10, the stack window at 1152,0
+	// 768x1080.
+	run(t, m, "focus", "next")
 	run(t, m, "move", "left", "100")
-	w := m.Windows[11]
+	w := m.Windows[10]
 	if !w.Floating {
 		t.Fatal("move did not float the tiled window")
 	}
@@ -94,15 +96,16 @@ func TestFocusFollowsCursorPolicy(t *testing.T) {
 	m := twoOutputs()
 	m.WindowAdded(10)
 	m.WindowAdded(11)
+	// Stack is [11 10] with 11 (the main) focused.
 	run(t, m, "focus", "main")
 	// Disabled by default: pointer enter does not move focus.
-	m.PointerEntered(11)
-	if fw := m.FocusedWindow(); fw == nil || fw.ID != 10 {
+	m.PointerEntered(10)
+	if fw := m.FocusedWindow(); fw == nil || fw.ID != 11 {
 		t.Fatalf("focus moved on hover while focus-follows-cursor is off")
 	}
 	run(t, m, "set", "focus-follows-cursor", "on")
-	m.PointerEntered(11)
-	if fw := m.FocusedWindow(); fw == nil || fw.ID != 11 {
+	m.PointerEntered(10)
+	if fw := m.FocusedWindow(); fw == nil || fw.ID != 10 {
 		t.Fatalf("focus did not follow the cursor when enabled")
 	}
 }

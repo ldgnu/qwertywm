@@ -127,7 +127,9 @@ compositor without touching the real session.
   dimensions.
 - **Workspace** — a named, ordered stack of windows (index 0 = first main
   window), a focused index, a layout name, and layout params. Created on
-  first reference, never destroyed.
+  first reference, never destroyed. New windows are inserted at the focused
+  position (xmonad's insertUp): they take the focused slot, and closing them
+  returns focus and position to the window the user was on.
 - **Output** — name, geometry, and the workspace it currently shows.
 - **Workspace modes** — in `independent` mode the user-facing workspace name
   is the internal name. In `locked` mode the user-facing name is a desktop

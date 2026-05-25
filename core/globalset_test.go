@@ -85,13 +85,14 @@ func TestBorderInset(t *testing.T) {
 	}
 
 	// Two windows: each is inset within its own slot, so the borders
-	// between them and at every screen edge all fit on screen.
+	// between them and at every screen edge all fit on screen. The newer
+	// window (11) takes the main slot.
 	m.WindowAdded(11)
 	arr = m.Arrange()
-	if got := arr.Placements[10].Rect; got != (Rect{X: 2, Y: 2, W: 1148, H: 1076}) {
+	if got := arr.Placements[11].Rect; got != (Rect{X: 2, Y: 2, W: 1148, H: 1076}) {
 		t.Errorf("master = %v, want 1148x1076 at 2,2", got)
 	}
-	if got := arr.Placements[11].Rect; got != (Rect{X: 1154, Y: 2, W: 764, H: 1076}) {
+	if got := arr.Placements[10].Rect; got != (Rect{X: 1154, Y: 2, W: 764, H: 1076}) {
 		t.Errorf("stack = %v, want 764x1076 at 1154,2", got)
 	}
 

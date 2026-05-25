@@ -85,13 +85,14 @@ func TestSecondWindowRetiles(t *testing.T) {
 	f.windowDimensions(w1, 1000, 600)
 	f.renderCycle()
 
-	f.addWindow()
+	w2 := f.addWindow()
 	reqs := f.manageCycle()
 	props := find(reqs, "river_window_v1", winReqProposeDimensions)
 	if len(props) != 2 {
 		t.Fatalf("got %d propose_dimensions after adding a second window, want 2 (both windows resize)", len(props))
 	}
-	// Default main ratio is 0.6: the master gets 600 wide, the stack 400.
+	// Default main ratio is 0.6 and the new window takes the main slot:
+	// the new window gets 600 wide, the first one moves to the 400 stack.
 	sizes := map[uint32][2]int32{}
 	for _, p := range props {
 		d := p.decoder()
@@ -99,8 +100,11 @@ func TestSecondWindowRetiles(t *testing.T) {
 		h, _ := d.Int()
 		sizes[p.object] = [2]int32{w, h}
 	}
-	if got := sizes[w1]; got != [2]int32{600, 600} {
-		t.Errorf("first window proposed %v, want [600 600]", got)
+	if got := sizes[w2]; got != [2]int32{600, 600} {
+		t.Errorf("new window proposed %v, want [600 600] (the main slot)", got)
+	}
+	if got := sizes[w1]; got != [2]int32{400, 600} {
+		t.Errorf("first window proposed %v, want [400 600] (moved to the stack)", got)
 	}
 }
 

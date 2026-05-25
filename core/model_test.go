@@ -45,11 +45,13 @@ func TestWindowAddedJoinsFocusedWorkspaceAndGetsFocus(t *testing.T) {
 	m.WindowAdded(10)
 	m.WindowAdded(11)
 	ws := m.Workspaces["1"]
-	if len(ws.Windows) != 2 || ws.Windows[0] != 10 || ws.Windows[1] != 11 {
-		t.Fatalf("workspace 1 windows = %v", ws.Windows)
+	// The new window is inserted at the focused position (insertUp), so it
+	// takes the front of the stack and the previous window slides back.
+	if len(ws.Windows) != 2 || ws.Windows[0] != 11 || ws.Windows[1] != 10 {
+		t.Fatalf("workspace 1 windows = %v, want [11 10]", ws.Windows)
 	}
-	if ws.Focus != 1 {
-		t.Errorf("focus = %d, want 1 (newest window)", ws.Focus)
+	if ws.Focus != 0 {
+		t.Errorf("focus = %d, want 0 (the newest window's slot)", ws.Focus)
 	}
 	if fw := m.FocusedWindow(); fw == nil || fw.ID != 11 {
 		t.Errorf("FocusedWindow = %v, want 11", fw)
@@ -61,22 +63,23 @@ func TestWindowClosedFixesFocus(t *testing.T) {
 	for id := WindowID(10); id <= 12; id++ {
 		m.WindowAdded(id)
 	}
+	// Stack is [12 11 10] (each new window inserted at the front).
 	ws := m.Workspaces["1"]
-	ws.Focus = 1 // focus the middle window
+	ws.Focus = 1 // focus the middle window (11)
 
 	m.WindowClosed(11)
-	if len(ws.Windows) != 2 || ws.Windows[0] != 10 || ws.Windows[1] != 12 {
-		t.Fatalf("windows = %v", ws.Windows)
+	if len(ws.Windows) != 2 || ws.Windows[0] != 12 || ws.Windows[1] != 10 {
+		t.Fatalf("windows = %v, want [12 10]", ws.Windows)
 	}
 	if ws.Focus != 1 {
 		t.Errorf("focus = %d, want 1 (window that took the closed slot)", ws.Focus)
 	}
 
-	m.WindowClosed(12)
+	m.WindowClosed(10)
 	if ws.Focus != 0 {
 		t.Errorf("focus = %d, want 0", ws.Focus)
 	}
-	m.WindowClosed(10)
+	m.WindowClosed(12)
 	if ws.Focus != -1 {
 		t.Errorf("focus = %d, want -1 for empty workspace", ws.Focus)
 	}
@@ -87,13 +90,18 @@ func TestFocusNextPrevWraps(t *testing.T) {
 	for id := WindowID(10); id <= 12; id++ {
 		m.WindowAdded(id)
 	}
+	// Stack is [12 11 10], focus on 12 (index 0).
 	ws := m.Workspaces["1"]
-	if ws.Focus != 2 {
+	if ws.Focus != 0 {
 		t.Fatalf("initial focus = %d", ws.Focus)
 	}
 	run(t, m, "focus", "next")
+	if ws.Focus != 1 {
+		t.Errorf("focus next = %d, want 1", ws.Focus)
+	}
+	run(t, m, "focus", "prev")
 	if ws.Focus != 0 {
-		t.Errorf("focus next from last = %d, want 0 (wrap)", ws.Focus)
+		t.Errorf("focus prev = %d, want 0", ws.Focus)
 	}
 	run(t, m, "focus", "prev")
 	if ws.Focus != 2 {
@@ -112,24 +120,25 @@ func TestSwapAndZoom(t *testing.T) {
 	}
 	ws := m.Workspaces["1"]
 
-	// Stack is [10 11 12], focus on 12. Swap prev -> [10 12 11], focus follows 12.
-	run(t, m, "swap", "prev")
-	if ws.Windows[1] != 12 || ws.Windows[2] != 11 || ws.Focus != 1 {
-		t.Fatalf("after swap prev: windows=%v focus=%d", ws.Windows, ws.Focus)
+	// Stack is [12 11 10], focus on 12 (the main). Swap next -> [11 12 10],
+	// focus follows 12 to index 1.
+	run(t, m, "swap", "next")
+	if ws.Windows[0] != 11 || ws.Windows[1] != 12 || ws.Focus != 1 {
+		t.Fatalf("after swap next: windows=%v focus=%d", ws.Windows, ws.Focus)
 	}
 
-	// Zoom promotes 12 to main: [12 10 11].
+	// Zoom promotes 12 back to main: [12 11 10].
 	run(t, m, "zoom")
-	if ws.Windows[0] != 12 || ws.Windows[1] != 10 || ws.Windows[2] != 11 {
+	if ws.Windows[0] != 12 || ws.Windows[1] != 11 || ws.Windows[2] != 10 {
 		t.Fatalf("after zoom: windows=%v", ws.Windows)
 	}
 	if ws.Focus != 0 {
 		t.Errorf("after zoom: focus=%d, want 0", ws.Focus)
 	}
 
-	// Zoom again while main swaps with the second window: [10 12 11].
+	// Zoom again while main swaps with the second window: [11 12 10].
 	run(t, m, "zoom")
-	if ws.Windows[0] != 10 || ws.Windows[1] != 12 {
+	if ws.Windows[0] != 11 || ws.Windows[1] != 12 {
 		t.Fatalf("after second zoom: windows=%v", ws.Windows)
 	}
 }
@@ -319,7 +328,8 @@ func TestFullscreen(t *testing.T) {
 	m := twoOutputs()
 	m.WindowAdded(10)
 	m.WindowAdded(11)
-	run(t, m, "focus", "main") // focus 10
+	// Stack is [11 10]; focus window 10.
+	run(t, m, "focus", "next")
 	run(t, m, "toggle-fullscreen")
 	if m.Windows[10].FullscreenOn != 1 {
 		t.Errorf("fullscreen on = %d, want output 1", m.Windows[10].FullscreenOn)

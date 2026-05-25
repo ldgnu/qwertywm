@@ -16,8 +16,9 @@ func TestDialogCloseReturnsFocusToParent(t *testing.T) {
 	m.WindowAdded(11) // some other window, opened later
 	m.WindowAppID(11, "foot")
 
-	// The user is working in the browser.
-	run(t, m, "focus", "main")
+	// The user is working in the browser (the older window, now at the
+	// back of the stack).
+	run(t, m, "focus", "next")
 	if fw := m.FocusedWindow(); fw == nil || fw.ID != 10 {
 		t.Fatalf("setup: focused = %v, want the browser", fw)
 	}
@@ -45,17 +46,35 @@ func TestDialogCloseReturnsFocusToParent(t *testing.T) {
 	}
 }
 
-// TestParentlessWindowCloseKeepsExistingBehavior documents that closing a
-// focused window with no parent falls back to the existing stack-index
-// behavior.
-func TestParentlessWindowCloseKeepsExistingBehavior(t *testing.T) {
+// TestParentlessWindowCloseReturnsToPreviousFocus covers the second
+// reported case: open a new app (no parent relationship) while working in
+// another window, close it, and end up back on the window that was focused
+// before — because the new window was inserted at that window's slot.
+func TestParentlessWindowCloseReturnsToPreviousFocus(t *testing.T) {
 	m := twoOutputs()
+	run(t, m, "set-layout", "monocle")
 	m.WindowAdded(10)
 	m.WindowAdded(11)
-	m.WindowAdded(12) // focused, no parent
+	// Work in window 10 (not the most recently opened one).
+	run(t, m, "focus", "next")
+	if fw := m.FocusedWindow(); fw == nil || fw.ID != 10 {
+		t.Fatalf("setup: focused = %v, want 10", fw)
+	}
+
+	// Open a new app: it takes window 10's slot and the focus.
+	m.WindowAdded(12)
+	if fw := m.FocusedWindow(); fw == nil || fw.ID != 12 {
+		t.Fatalf("new window did not take focus: %v", fw)
+	}
+
+	// Close it: focus and the top of the monocle stack return to 10.
 	m.WindowClosed(12)
-	if fw := m.FocusedWindow(); fw == nil || fw.ID != 11 {
-		t.Errorf("focus = %v, want 11 (the last remaining window)", fw)
+	if fw := m.FocusedWindow(); fw == nil || fw.ID != 10 {
+		t.Errorf("focus after closing the new window = %v, want 10 (the previously focused window)", fw)
+	}
+	order := m.Arrange().Order
+	if order[len(order)-1] != 10 {
+		t.Errorf("top of the render order = %v, want 10", order)
 	}
 }
 
@@ -67,7 +86,7 @@ func TestDialogCloseParentOnOtherWorkspace(t *testing.T) {
 	m.WindowAdded(20)
 	m.WindowParent(20, 10)
 	// The parent gets sent to another workspace while its dialog is open.
-	run(t, m, "focus", "main")
+	run(t, m, "focus", "next") // focus the parent (10)
 	run(t, m, "send", "5")
 	// The dialog (still on workspace 1) closes; focus stays on workspace
 	// 1's remaining content rather than following the parent to 5.

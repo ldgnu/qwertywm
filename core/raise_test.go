@@ -20,18 +20,19 @@ func TestMonocleFocusedWindowOnTop(t *testing.T) {
 		return order[len(order)-1]
 	}
 
-	// Window 12 is focused (newest) and must be on top.
+	// Window 12 is focused (newest) and must be on top. The stack is
+	// [12 11 10] with each new window inserted at the front.
 	if got := top(); got != 12 {
 		t.Fatalf("top window = %d, want 12", got)
 	}
-	// focus next wraps to window 10: it must come to the top.
-	run(t, m, "focus", "next")
-	if got := top(); got != 10 {
-		t.Errorf("after focus next, top window = %d, want 10", got)
-	}
+	// focus next moves to window 11: it must come to the top.
 	run(t, m, "focus", "next")
 	if got := top(); got != 11 {
-		t.Errorf("after focus next x2, top window = %d, want 11", got)
+		t.Errorf("after focus next, top window = %d, want 11", got)
+	}
+	run(t, m, "focus", "next")
+	if got := top(); got != 10 {
+		t.Errorf("after focus next x2, top window = %d, want 10", got)
 	}
 	// Every window still appears exactly once in the order.
 	seen := map[WindowID]int{}
