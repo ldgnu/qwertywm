@@ -521,12 +521,30 @@ func (m *Model) WindowClosed(id WindowID) {
 	if !ok {
 		return
 	}
+	// Note whether the closing window held its workspace's focus before
+	// the stack is modified.
+	wasFocused := false
+	if ws, ok := m.Workspaces[w.Workspace]; ok && ws.Focus >= 0 && ws.Focus < len(ws.Windows) {
+		wasFocused = ws.Windows[ws.Focus] == id
+	}
 	m.removeFromWorkspace(w)
 	delete(m.Windows, id)
 	// Clear dangling parent references.
 	for _, other := range m.Windows {
 		if other.Parent == id {
 			other.Parent = 0
+		}
+	}
+	// A focused dialog closing returns focus to its parent (the window the
+	// user was working in) rather than to whichever window happens to
+	// occupy the vacated stack index.
+	if wasFocused && w.Parent != 0 {
+		if parent, ok := m.Windows[w.Parent]; ok && parent.Workspace == w.Workspace {
+			if ws, ok := m.Workspaces[w.Workspace]; ok {
+				if i := indexOf(ws.Windows, parent.ID); i >= 0 {
+					ws.Focus = i
+				}
+			}
 		}
 	}
 	m.markChanged()
