@@ -71,3 +71,23 @@ func (r Rect) Inset(n int32) Rect {
 func (r Rect) Center() (int32, int32) {
 	return r.X + r.W/2, r.Y + r.H/2
 }
+
+// Intersect returns the overlapping region of r and other, or the zero Rect
+// if they do not overlap.
+func (r Rect) Intersect(other Rect) Rect {
+	x1 := max32(r.X, other.X)
+	y1 := max32(r.Y, other.Y)
+	x2 := min32(r.X+r.W, other.X+other.W)
+	y2 := min32(r.Y+r.H, other.Y+other.H)
+	if x2 <= x1 || y2 <= y1 {
+		return Rect{}
+	}
+	return Rect{X: x1, Y: y1, W: x2 - x1, H: y2 - y1}
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}

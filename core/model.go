@@ -95,12 +95,20 @@ type Output struct {
 }
 
 // Usable returns the area of the output that windows should be arranged
-// within: the output geometry minus any layer shell exclusive zones.
+// within: the output geometry minus any layer shell exclusive zones. The
+// stored area is clamped to the current geometry so that whichever order
+// the compositor delivers usable-area and geometry updates in (it sends
+// the layer shell area before the new output dimensions when the scale
+// changes), the result never extends beyond the output.
 func (o *Output) Usable() Rect {
 	if o.usable.Empty() {
 		return o.Rect
 	}
-	return o.usable
+	u := o.usable.Intersect(o.Rect)
+	if u.Empty() {
+		return o.Rect
+	}
+	return u
 }
 
 // Model is the complete window-management state. It is a plain value-ish
@@ -420,21 +428,26 @@ func (m *Model) OutputGeometry(id OutputID, rect Rect) {
 		return
 	}
 	out.Rect = rect
-	// The usable area is stale until the compositor reports a new one.
-	out.usable = Rect{}
+	// The stored usable area is deliberately kept: when the output's
+	// logical size changes (e.g. a scale change) the compositor sends the
+	// updated layer shell usable area *before* the new dimensions, so by
+	// the time this runs the stored area is usually already correct for
+	// the new geometry. Usable() clamps it to the new rect either way.
 	m.markChanged()
 }
 
 // OutputUsableArea records the area of the output remaining after layer
 // shell exclusive zones (bars, docks) are subtracted. The coordinates are
-// global, matching the output position. An area that does not intersect
-// the output (or is empty) resets to the full output being usable.
+// global, matching the output position. An empty area resets to the full
+// output being usable. The area is stored as reported and clamped to the
+// output geometry at use time, so it does not matter whether it arrives
+// before or after a geometry change.
 func (m *Model) OutputUsableArea(id OutputID, area Rect) {
 	out, ok := m.Outputs[id]
 	if !ok {
 		return
 	}
-	if area.Empty() || !out.Rect.Overlaps(area) {
+	if area.Empty() {
 		area = Rect{}
 	}
 	if out.usable == area {
