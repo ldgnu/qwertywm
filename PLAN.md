@@ -269,6 +269,13 @@ they block daily use.
   patch: lock without blanking, recover a stuck screen with a VT switch.
 - **xdg-activation is not forwarded to window managers** (detailed in the
   blocked-on-river section above).
+- **mako notifications permanently stop appearing** until mako restarts,
+  triggered intermittently by wl_output churn (DPMS cycles, scale changes).
+  River's LayerShellOutput.sendConfigures skips unmapped layer surfaces, so
+  a surface that acks its initial configure and then commits a different
+  size before attaching a buffer (mako's resize race) waits forever for a
+  configure river never sends. Patch: contrib/river-patches/ on the
+  diagnostics branch (river-layer-configure.patch); fix belongs upstream.
 
 ### Untested territory
 
