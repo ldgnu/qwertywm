@@ -179,7 +179,7 @@ weirctl bind-pointer $mod+Middle toggle-float
 #   weirctl subscribe            stream a state snapshot on every change
 #   weirctl help [command]       command reference
 #   weirctl set                  list every option for "set"
-# See contrib/waybar/ for a waybar module fed by "weirctl subscribe".
+# (a status bar can consume "weirctl subscribe" for live workspace state)
 
 # ---------------------------------------------------------------------------
 # Session
