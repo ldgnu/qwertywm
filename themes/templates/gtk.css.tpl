@@ -1,0 +1,27 @@
+/* TTY color scheme */
+@define-color window_bg_color $BG;
+@define-color window_fg_color $FG;
+@define-color view_bg_color $BG;
+@define-color view_fg_color $FG;
+@define-color headerbar_bg_color $BG;
+@define-color headerbar_fg_color $FG;
+@define-color sidebar_bg_color $BG;
+@define-color sidebar_fg_color $FG;
+@define-color card_bg_color $BG_LIGHT;
+@define-color card_fg_color $FG;
+@define-color popover_bg_color $BG;
+@define-color popover_fg_color $FG;
+@define-color dialog_bg_color $BG;
+@define-color dialog_fg_color $FG;
+@define-color accent_bg_color $GREEN;
+@define-color accent_fg_color #000000;
+@define-color destructive_bg_color $RED;
+@define-color destructive_fg_color #000000;
+@define-color error_bg_color $RED;
+@define-color error_fg_color #ffffff;
+@define-color success_bg_color $GREEN;
+@define-color success_fg_color #000000;
+@define-color warning_bg_color $YELLOW;
+@define-color warning_fg_color #000000;
+@define-color theme_selected_bg_color $GREEN;
+@define-color theme_selected_fg_color #000000;
