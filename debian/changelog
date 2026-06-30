@@ -1,0 +1,6 @@
+qwertywm (0.1.0-1) unstable; urgency=medium
+
+  * Initial release.
+  * Fork of weir by psanford, renamed to qwertywm.
+
+ -- ldgnu <ldgnu@github>  Mon, 30 Jun 2025 00:00:00 -0300

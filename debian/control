@@ -1,0 +1,21 @@
+Source: qwertywm
+Section: x11
+Priority: optional
+Maintainer: ldgnu <ldgnu@github>
+Build-Depends: debhelper-compat (= 13), golang-go, wayland-protocols, libxkbcommon-dev
+Standards-Version: 4.7.0
+Homepage: https://github.com/ldgnu/qwertywm
+
+Package: qwertywm
+Architecture: amd64
+Depends: river (>= 0.4), ${shlibs:Depends}, ${misc:Depends}
+Description: Dynamic tiling window manager for river
+ qwertywm is an xmonad-style dynamic tiling window manager that runs
+ on top of the river Wayland compositor. It features:
+  * Master/stack tiling with configurable ratio, count, and location
+  * Monocle mode
+  * Floating and fullscreen windows
+  * Multi-output support with directional focus
+  * Programmatic control over a unix socket (qwertywmctl)
+  * Keyboard-driven workflow
+  * Independent or locked workspace modes
