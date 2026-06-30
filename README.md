@@ -1,7 +1,9 @@
 <img width="607" height="239" alt="imagen" src="https://github.com/user-attachments/assets/750d5b51-9588-445a-993f-78a680cf3844" />
-> **⚠️ Estado: desarrollo activo.** Puede tener bugs, cosas rotas y APIs que
-> cambian sin aviso. Si te lo bajás, bienvenido, pero no hay garantías de que
-> ande en tu setup. PRs y issues bienvenidos.
+
+
+**⚠️ Estado: desarrollo activo.** Puede tener bugs, cosas rotas y APIs que
+cambian sin aviso. Si te lo bajás, bienvenido, pero no hay garantías de que
+ande en tu setup. PRs y issues bienvenidos.
 
 Un window manager dinámico estilo xmonad para [river](https://codeberg.org/river/river),
 escrito en Go. Tiling dinámico, configuración programática vía socket unix,
