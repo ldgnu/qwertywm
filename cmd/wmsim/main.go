@@ -37,7 +37,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/psanford/weir/core"
+	"qwertywm/core"
 )
 
 func main() {

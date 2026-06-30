@@ -166,7 +166,7 @@ func (g *generator) emitHeader(sources []string) {
 	g.p("import (")
 	g.p("\t\"fmt\"")
 	g.p("")
-	g.p("\t\"github.com/psanford/weir/wire\"")
+	g.p("\t\"qwertywm/wire\"")
 	g.p(")")
 	g.p("")
 	g.p("// silence unused-import errors for protocols that never use fmt")

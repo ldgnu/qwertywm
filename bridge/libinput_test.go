@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/psanford/weir/wire"
+	"qwertywm/wire"
 )
 
 const (

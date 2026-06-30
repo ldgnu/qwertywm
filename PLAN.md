@@ -46,7 +46,7 @@ A weir is a small dam that controls a river's flow.
 | Rendering | none in v1 | borders are compositor-side; everything else is external |
 | IPC | unix socket in `$XDG_RUNTIME_DIR`, newline-delimited JSON | proven (i3/sway), scriptable from anything |
 | Config | none — runtime commands only | requested; matches river-classic |
-| Module path | `github.com/psanford/weir` | change with one sed if hosted elsewhere |
+| Module path | `qwertywm` | change with one sed if hosted elsewhere |
 
 ## Architecture
 

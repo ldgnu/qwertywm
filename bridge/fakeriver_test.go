@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/psanford/weir/core"
-	"github.com/psanford/weir/protocols/river"
-	"github.com/psanford/weir/wire"
-	"github.com/psanford/weir/wire/wiretest"
+	"qwertywm/core"
+	"qwertywm/protocols/river"
+	"qwertywm/wire"
+	"qwertywm/wire/wiretest"
 )
 
 // Request and event opcodes for the interfaces the fake river implements.

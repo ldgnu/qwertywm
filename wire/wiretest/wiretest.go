@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/psanford/weir/wire"
+	"qwertywm/wire"
 )
 
 const headerSize = 8

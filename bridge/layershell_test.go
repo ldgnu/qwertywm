@@ -3,7 +3,7 @@ package bridge
 import (
 	"testing"
 
-	"github.com/psanford/weir/wire"
+	"qwertywm/wire"
 )
 
 // Layer shell opcodes, from declaration order in river-layer-shell-v1.xml.

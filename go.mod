@@ -1,3 +1,3 @@
-module github.com/psanford/weir
+module qwertywm
 
 go 1.21

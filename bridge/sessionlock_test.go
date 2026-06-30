@@ -3,7 +3,7 @@ package bridge
 import (
 	"testing"
 
-	"github.com/psanford/weir/wire"
+	"qwertywm/wire"
 )
 
 // TestSessionUnlockReassertsFocus checks that keyboard focus is re-sent to

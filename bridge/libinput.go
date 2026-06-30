@@ -1,8 +1,8 @@
 package bridge
 
 import (
-	"github.com/psanford/weir/core"
-	"github.com/psanford/weir/protocols/river"
+	"qwertywm/core"
+	"qwertywm/protocols/river"
 )
 
 // libinputDeviceState is the bridge's bookkeeping for one libinput device.

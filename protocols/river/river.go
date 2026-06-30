@@ -5,7 +5,7 @@ package river
 import (
 	"fmt"
 
-	"github.com/psanford/weir/wire"
+	"qwertywm/wire"
 )
 
 // silence unused-import errors for protocols that never use fmt

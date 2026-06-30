@@ -4,8 +4,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/psanford/weir/core"
-	"github.com/psanford/weir/protocols/river"
+	"qwertywm/core"
+	"qwertywm/protocols/river"
 )
 
 // chord identifies a key binding by what triggers it.

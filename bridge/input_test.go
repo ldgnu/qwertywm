@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/psanford/weir/core"
-	"github.com/psanford/weir/wire"
+	"qwertywm/core"
+	"qwertywm/wire"
 )
 
 // waitForFile polls for a file to exist, failing the test after a timeout.

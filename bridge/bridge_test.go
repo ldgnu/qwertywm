@@ -3,7 +3,7 @@ package bridge
 import (
 	"testing"
 
-	"github.com/psanford/weir/core"
+	"qwertywm/core"
 )
 
 // TestSingleWindowLifecycle walks a window from creation to display: the

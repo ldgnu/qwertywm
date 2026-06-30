@@ -3,9 +3,9 @@ package river_test
 import (
 	"testing"
 
-	"github.com/psanford/weir/protocols/river"
-	"github.com/psanford/weir/wire"
-	"github.com/psanford/weir/wire/wiretest"
+	"qwertywm/protocols/river"
+	"qwertywm/wire"
+	"qwertywm/wire/wiretest"
 )
 
 // opcodes used by the fake compositor, matching the order of declarations

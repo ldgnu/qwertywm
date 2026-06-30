@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/psanford/weir/core"
-	"github.com/psanford/weir/wire"
+	"qwertywm/core"
+	"qwertywm/wire"
 )
 
 const (

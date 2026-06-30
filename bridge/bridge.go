@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/psanford/weir/core"
-	"github.com/psanford/weir/protocols/river"
-	"github.com/psanford/weir/protocols/wl"
-	"github.com/psanford/weir/wire"
+	"qwertywm/core"
+	"qwertywm/protocols/river"
+	"qwertywm/protocols/wl"
+	"qwertywm/wire"
 )
 
 // ErrUnavailable is returned by Run when the compositor refuses to grant
