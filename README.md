@@ -1,5 +1,4 @@
-<img width="1914" height="1079" alt="imagen" src="https://github.com/user-attachments/assets/e33b5b7f-71ed-4b55-983e-dc1b6f79dd95" /># qwertywm 🚧
-
+<img width="607" height="239" alt="imagen" src="https://github.com/user-attachments/assets/750d5b51-9588-445a-993f-78a680cf3844" />
 > **⚠️ Estado: desarrollo activo.** Puede tener bugs, cosas rotas y APIs que
 > cambian sin aviso. Si te lo bajás, bienvenido, pero no hay garantías de que
 > ande en tu setup. PRs y issues bienvenidos.
