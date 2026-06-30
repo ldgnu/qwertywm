@@ -1,4 +1,4 @@
-# qwertywm 🚧
+<img width="1914" height="1079" alt="imagen" src="https://github.com/user-attachments/assets/e33b5b7f-71ed-4b55-983e-dc1b6f79dd95" /># qwertywm 🚧
 
 > **⚠️ Estado: desarrollo activo.** Puede tener bugs, cosas rotas y APIs que
 > cambian sin aviso. Si te lo bajás, bienvenido, pero no hay garantías de que
@@ -7,6 +7,10 @@
 Un window manager dinámico estilo xmonad para [river](https://codeberg.org/river/river),
 escrito en Go. Tiling dinámico, configuración programática vía socket unix,
 soporte multi-monitor de primera clase.
+
+<img width="1918" height="1079" alt="imagen" src="https://github.com/user-attachments/assets/44bae52a-df8e-474b-b465-d75aa3746cc5" />
+<img width="1913" height="1051" alt="imagen" src="https://github.com/user-attachments/assets/7eeb694a-d812-43a9-8541-29ef05e92f32" />
+
 
 ## Créditos
 
