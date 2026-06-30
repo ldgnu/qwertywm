@@ -1,75 +1,118 @@
-# weir
+# qwertywm
 
-A window manager for [river](https://codeberg.org/river/river) 0.4+, written
-in Go. xmonad-style dynamic tiling, fully programmatic configuration over a
-unix socket, first-class multi-output support.
+Un window manager dinámico estilo xmonad para [river](https://codeberg.org/river/river),
+escrito en Go. Tiling dinámico, configuración programática vía socket unix,
+soporte multi-monitor de primera clase.
 
-A weir is a small dam that controls a river's flow.
+## Créditos
 
-**Status: early development, but functional.** Tiling, workspaces,
-multi-output, key/pointer bindings, and the control socket all work against
-river 0.4.5. See [PLAN.md](PLAN.md) for the design and roadmap, and
-[example/init](example/init) for a complete xmonad-flavored configuration.
+**qwertywm** es un fork de [weir](https://github.com/psanford/weir) por
+[psanford](https://github.com/psanford). El proyecto original fue renombrado
+y modificado para uso personal por [ldgnu](https://github.com/ldgnu).
+
+Gracias a psanford por el laburazo del core, la arquitectura limpia y toda la
+base sólida. Este fork solo cambia nombres, afina detalles y adapta el setup.
+
+---
+
+## Requisitos
+
+- [river](https://codeberg.org/river/river) ≥ 0.4
+- Go ≥ 1.21 (solo para compilar)
+- `wayland` (protocolos)
+- `wayland-protocols`
+- `libxkbcommon` (para `keyboard-layout`)
+
+## Instalación
+
+### Arch Linux / CachyOS
 
 ```sh
-go install github.com/psanford/weir/cmd/weir@latest
-go install github.com/psanford/weir/cmd/weirctl@latest
-cp example/init ~/.config/river/init && chmod +x ~/.config/river/init
+# Dependencias
+sudo pacman -S go river wayland wayland-protocols libxkbcommon
+
+# Compilar e instalar
+git clone https://github.com/ldgnu/qwertywm.git
+cd qwertywm
+go build ./cmd/qwertywm
+go build ./cmd/qwertywmctl
+sudo cp qwertywm qwertywmctl /usr/local/bin/
+
+# Config
+mkdir -p ~/.config/river
+cat > ~/.config/river/init << 'EOF'
+#!/bin/sh
+wlr-randr --output HDMI-A-1 --pos 0,0 --mode 1920x1080
+wlr-randr --output DP-1 --pos 1920,0 --mode 1920x1080 --transform 90
+waybar &
+qwertywm &
+qwertywmctl wait-for-socket
+. ~/.config/qwertywm/config
+qwertywmctl focus-output HDMI-A-1 && qwertywmctl view 1
+qwertywmctl focus-output DP-1 && qwertywmctl view 11
+EOF
+chmod +x ~/.config/river/init
+
+# Iniciar river desde un TTY o DM
 river
 ```
 
-## Layout
+### Ubuntu 24.04
 
-| Path | What |
+```sh
+# Dependencias
+sudo apt install golang-go river wayland-protocols libxkbcommon-dev
+
+# Compilar
+git clone https://github.com/ldgnu/qwertywm.git
+cd qwertywm
+go build ./cmd/qwertywm
+go build ./cmd/qwertywmctl
+sudo cp qwertywm qwertywmctl /usr/local/bin/
+
+# (seguir los pasos de config de arriba)
+```
+
+### Build rápido (cualquier distro)
+
+```sh
+curl -sSL https://github.com/ldgnu/qwertywm/archive/main.tar.gz | tar xz
+cd qwertywm-main
+go build ./cmd/qwertywm && go build ./cmd/qwertywmctl
+sudo cp qwertywm qwertywmctl /usr/local/bin/
+```
+
+## Configuración
+
+qwertywm se configura con commands de `qwertywmctl` en tu init script.
+Ejemplo completo en [`example/init`](example/init) o en la configuración
+personal de ldgnu en [`dotfiles`](https://github.com/ldgnu/dotfiles).
+
+## Uso básico
+
+```sh
+qwertywmctl focus next        # mover foco a la siguiente ventana
+qwertywmctl view 3            # ir al workspace 3
+qwertywmctl send 5            # mandar ventana al workspace 5
+qwertywmctl cycle-layout monocle,left,top  # cambiar layout
+qwertywmctl toggle-float      # flotar/desflotar ventana
+qwertywmctl close             # cerrar ventana
+qwertywmctl spawn kitty       # abrir terminal
+qwertywmctl help              # ver todos los comandos
+```
+
+## Estructura del proyecto
+
+| Path | Qué es |
 | --- | --- |
-| `core/` | The window-management state machine: model, layouts, commands. Pure Go, no Wayland imports, fully unit-tested. |
-| `bridge/` | The river protocol adapter: owns the manage/render sequence loop and translates between protocol events and the core model. Tested against a fake compositor that enforces the protocol's sequencing rules. |
-| `ipc/` | The control socket: newline-delimited JSON over a unix socket. Commands, queries, and a state-change subscription stream for bars. |
-| `cmd/weir/` | The window manager binary. Start it from river's init script. |
-| `cmd/weirctl/` | The CLI: `weirctl focus next`, `weirctl get state`, `weirctl subscribe`, `weirctl help`. |
-| `wire/` | Pure-Go Wayland client wire protocol: connection, marshalling, fd passing, object lifetime, and the hand-written `wl_display`/`wl_registry`/`wl_callback` bootstrap. No cgo. |
-| `wire/wiretest/` | A fake compositor speaking the raw wire format over a socketpair, for testing protocol code without river. |
-| `protocol/` | Vendored protocol XML (wayland core + river's six extensions). |
-| `protocols/wl/`, `protocols/river/` | Generated typed bindings. Regenerate with `go generate ./...`. |
-| `internal/gen/` | The protocol code generator. |
-| `cmd/wmsim/` | ASCII simulator: replay a script of events and commands against the core and render the resulting layout. |
-| `example/` | wmsim scenario scripts. |
-
-## Developing
-
-```sh
-go test ./...          # unit + property + protocol tests, no compositor needed
-go run ./cmd/wmsim example/two-outputs.txt
-go run ./cmd/wmsim     # interactive REPL ("help" for syntax)
-```
-
-The property tests in `core/invariants_test.go` drive the model with tens of
-thousands of random operations and check the structural invariants from
-PLAN.md after every step. If you change the model, that suite is the first
-thing to trust. The bridge tests in `bridge/` run against a fake compositor
-that fails the test if a request is ever sent in an illegal protocol phase.
-
-### Against a real river
-
-`scripts/integration-test.sh` runs weir inside a real headless river
-(wlroots headless backend + pixman renderer — no GPU, no display, no seat),
-opens terminals, drives weir with `weirctl`, and asserts on the JSON state
-it reports. `scripts/smoke-test.sh` is a faster log-based check and
-`scripts/screenshot-test.sh` captures a PNG of the tiled layout via grim.
-
-```sh
-eval "$(scripts/fetch-river.sh)"   # sets $RIVER and $FOOT from the nix cache
-scripts/smoke-test.sh
-```
-
-Or run it nested in your current desktop session to interact with it:
-
-```sh
-go build ./cmd/weir && river -c ./weir
-```
+| `core/` | State machine: modelo, layouts, comandos. Go puro, sin Wayland. |
+| `bridge/` | Adaptador del protocolo river. Conecta el core con el compositor. |
+| `ipc/` | Socket unix + JSON: commands, queries, subscriptions. |
+| `cmd/qwertywm/` | El binary del WM. |
+| `cmd/qwertywmctl/` | El CLI para controlar qwertywm. |
+| `wire/` | Cliente Wayland en Go puro, sin cgo. |
+| `protocol/` | XMLs del protocolo vendeados. |
 
 ## License
 
-MIT. The protocol definitions vendored under `protocol/` carry their own
-permissive licenses in their embedded `<copyright>` blocks (wayland.xml from
-the Wayland project, river-*.xml from river).
+MIT. El proyecto original weir es MIT por psanford. Ver [LICENSE](LICENSE).
