@@ -19,8 +19,14 @@ soporte multi-monitor de primera clase.
 [psanford](https://github.com/psanford). El proyecto original fue renombrado
 y modificado para uso personal por [ldgnu](https://github.com/ldgnu).
 
-Gracias a psanford por el laburazo del core, la arquitectura limpia y toda la
-base sólida.
+- **psanford** — autor original del core, la arquitectura limpia y toda la base sólida.
+- **ldgnu** — fork, modificaciones, integración con river y configuración personal.
+- **OpenCode (AI)** — asistencia con documentación, scripts, temas y packaging.
+
+> Este proyecto fue desarrollado con asistencia de inteligencia artificial
+> (OpenCode / deepseek-v4-flash) para generar documentación, scripts de
+> instalación, sistema de temas, packaging para Debian/Ubuntu, y la
+> configuración completa del ecosistema river + qwertywm + waybar.
 
 ---
 
