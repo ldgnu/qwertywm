@@ -17,8 +17,11 @@ const (
 type LayoutName string
 
 const (
-	LayoutTile    LayoutName = "tile"
-	LayoutMonocle LayoutName = "monocle"
+	LayoutTile      LayoutName = "tile"
+	LayoutMonocle   LayoutName = "monocle"
+	LayoutTabbed    LayoutName = "tabbed"
+	LayoutFibonacci LayoutName = "fibonacci"
+	LayoutColumns   LayoutName = "columns"
 )
 
 // LayoutParams are the per-workspace knobs that parameterize a layout.
@@ -98,6 +101,12 @@ func ComputeLayout(layout LayoutName, area Rect, count int, p LayoutParams) []Re
 	switch layout {
 	case LayoutMonocle:
 		return arrangeMonocle(area, count, p)
+	case LayoutTabbed:
+		return arrangeTabbed(area, count, p)
+	case LayoutFibonacci:
+		return arrangeFibonacci(area, count, p)
+	case LayoutColumns:
+		return arrangeColumns(area, count, p)
 	default:
 		return arrangeTile(area, count, p)
 	}
@@ -106,7 +115,7 @@ func ComputeLayout(layout LayoutName, area Rect, count int, p LayoutParams) []Re
 // ValidLayout reports whether name is a known layout.
 func ValidLayout(name LayoutName) bool {
 	switch name {
-	case LayoutTile, LayoutMonocle:
+	case LayoutTile, LayoutMonocle, LayoutTabbed, LayoutFibonacci, LayoutColumns:
 		return true
 	}
 	return false
@@ -123,6 +132,65 @@ func arrangeMonocle(area Rect, count int, p LayoutParams) []Rect {
 		rects[i] = usable
 	}
 	return rects
+}
+
+// arrangeTabbed puts all windows full-screen, stacked. Only the focused
+// window is visible; the rest are hidden behind it. This is effectively
+// monocle but indicates the intent is tabs (the bar shows workspace).
+func arrangeTabbed(area Rect, count int, p LayoutParams) []Rect {
+	return arrangeMonocle(area, count, p)
+}
+
+// arrangeFibonacci uses a fibonacci spiral: each window takes a portion
+// of the remaining space, alternating horizontal and vertical splits.
+func arrangeFibonacci(area Rect, count int, p LayoutParams) []Rect {
+	if count <= 0 {
+		return nil
+	}
+	p = p.Clamp()
+	smart := p.SmartGaps && count == 1
+	outer := p.OuterGap
+	inner := p.InnerGap
+	if smart {
+		outer = 0
+		inner = 0
+	}
+	usable := applyOuterGap(area, outer)
+	rects := make([]Rect, count)
+	r := usable
+	for i := 0; i < count; i++ {
+		rects[i] = r
+		if i < count-1 {
+			// Alternate: split horizontally, then vertically
+			if i%2 == 0 {
+				// Vertical split: left half
+				w := (r.W - inner) / 2
+				r = Rect{X: r.X, Y: r.Y, W: w, H: r.H}
+			} else {
+				// Horizontal split: top half
+				h := (r.H - inner) / 2
+				r = Rect{X: r.X + r.W + inner, Y: r.Y, W: r.W, H: h}
+			}
+		}
+	}
+	return rects
+}
+
+// arrangeColumns divides the output into N equal columns.
+func arrangeColumns(area Rect, count int, p LayoutParams) []Rect {
+	if count <= 0 {
+		return nil
+	}
+	p = p.Clamp()
+	smart := p.SmartGaps && count == 1
+	outer := p.OuterGap
+	inner := p.InnerGap
+	if smart {
+		outer = 0
+		inner = 0
+	}
+	usable := applyOuterGap(area, outer)
+	return splitEven(usable, count, axisX, inner)
 }
 
 // arrangeTile implements the classic master/stack layout: MainCount windows
