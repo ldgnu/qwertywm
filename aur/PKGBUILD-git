@@ -1,0 +1,34 @@
+# Maintainer: ldgnu <ldgnu@github>
+
+pkgname=qwertywm-git
+pkgver=r0.gfbe448c
+pkgrel=1
+pkgdesc="Dynamic tiling window manager for river (xmonad-style) - git version"
+arch=('x86_64')
+url="https://github.com/ldgnu/qwertywm"
+license=('MIT')
+depends=('river' 'glibc')
+makedepends=('go' 'wayland-protocols' 'libxkbcommon' 'git')
+provides=('qwertywm')
+conflicts=('qwertywm-bin')
+source=("$pkgname::git+https://github.com/ldgnu/qwertywm.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/$pkgname"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "$srcdir/$pkgname"
+  go build -ldflags="-s -w" -o qwertywm ./cmd/qwertywm
+  go build -ldflags="-s -w" -o qwertywmctl ./cmd/qwertywmctl
+}
+
+package() {
+  cd "$srcdir/$pkgname"
+  install -Dm755 qwertywm "$pkgdir/usr/bin/qwertywm"
+  install -Dm755 qwertywmctl "$pkgdir/usr/bin/qwertywmctl"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/qwertywm/README.md"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/qwertywm/LICENSE"
+}
