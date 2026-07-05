@@ -7,8 +7,18 @@ pkgdesc="Dynamic tiling window manager for river (xmonad-style) - git version"
 arch=('x86_64')
 url="https://github.com/ldgnu/qwertywm"
 license=('MIT')
-depends=('river' 'glibc')
-makedepends=('go' 'wayland-protocols' 'libxkbcommon' 'git')
+depends=(
+  'river>=0.4'
+  'glibc'
+  'libxkbcommon'
+  'wayland'
+)
+makedepends=(
+  'go>=1.21'
+  'wayland-protocols'
+  'libxkbcommon'
+  'git'
+)
 provides=('qwertywm')
 conflicts=('qwertywm-bin')
 source=("$pkgname::git+https://github.com/ldgnu/qwertywm.git")
