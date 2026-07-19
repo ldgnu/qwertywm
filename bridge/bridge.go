@@ -694,8 +694,11 @@ func (b *Bridge) applyWindowManageState(ws *windowState, p core.Placement) {
 		ws.fullscreen = p.Fullscreen
 	}
 
-	// Proposed dimensions. Fullscreen windows are sized by the compositor.
-	if p.Fullscreen == 0 {
+	// Proposed dimensions. Only propose for visible windows — hidden
+	// windows (on non-visible workspaces) would otherwise get 0×0 from
+	// the default zero-valued Placement, making them shrink to minimum
+	// size before being hidden in the render phase.
+	if p.Fullscreen == 0 && p.Visible {
 		w, h := p.Rect.W, p.Rect.H
 		if !ws.proposed || w != ws.proposedW || h != ws.proposedH {
 			ws.proxy.ProposeDimensions(w, h)
