@@ -8,9 +8,10 @@
 set -e
 
 # ──────────────────── DETECTAR MODO ────────────────────
-# Si estamos en un pipe (curl | bash), nos falta el repo.
-# Lo clonamos temporalmente.
+# Si estamos en un pipe (curl | bash), el stdin es el script.
+# Redirigimos a /dev/tty para poder preguntar al usuario.
 if [ ! -f "install.sh" ] || [ "$(basename "$0")" != "install.sh" ] 2>/dev/null; then
+    exec </dev/tty
     TMPDIR=$(mktemp -d)
     echo "  Descargando qwertywm..."
     git clone --depth=1 https://github.com/ldgnu/qwertywm.git "$TMPDIR" 2>/dev/null
