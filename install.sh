@@ -190,6 +190,10 @@ go build ./cmd/qwertywm
 go build -o qwertywmctl ./cmd/qwertywmctl
 sudo cp qwertywm qwertywmctl /usr/local/bin/
 
+echo "==> Compilando wrapper para fastfetch..."
+gcc -shared -fPIC -o /tmp/libqwertywm-rename.so cmd/qwertywm-session/rename.c -ldl
+sudo cp /tmp/libqwertywm-rename.so /usr/local/lib/
+
 # ──────────────────── PALETA ────────────────────
 case "$theme" in
     tty)
@@ -425,6 +429,7 @@ export XDG_CURRENT_DESKTOP=qwertywm
 export XDG_SESSION_DESKTOP=qwertywm
 export DESKTOP_SESSION=qwertywm
 export MOZ_ENABLE_WAYLAND=1
+export LD_PRELOAD=/usr/local/lib/libqwertywm-rename.so
 
 # ─── MONITORES (editá si tenés otros nombres) ───
 RIV
