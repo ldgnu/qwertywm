@@ -208,9 +208,13 @@ mkdir -p ~/.config/foot
 # qwertywm config
 cat > ~/.config/qwertywm/config << CFG
 #!/bin/sh
+# ─── EDITÁ ESTO ───
 mod=Super
 terminal=$terminal
 launcher=${launcher:-none}
+mon_left="${mon1:-DP-1}"
+mon_right="${mon2:-HDMI-A-1}"
+# ─────────────────
 
 qwertywmctl set border-width 2
 qwertywmctl set border-color-focused   0x${bd_f}ff
@@ -252,8 +256,8 @@ qwertywmctl bind \$mod+Ctrl+${f_d} spawn "qwertywmctl resize vertical 10"
 qwertywmctl bind \$mod+Ctrl+${f_u} spawn "qwertywmctl resize vertical -10"
 
 # Monitores
-qwertywmctl bind \$mod+w  focus-output ${mon1:-DP-1}
-qwertywmctl bind \$mod+e  focus-output ${mon2:-HDMI-A-1}
+qwertywmctl bind \$mod+w  focus-output \$mon_left
+qwertywmctl bind \$mod+e  focus-output \$mon_right
 qwertywmctl bind \$mod+Shift+Tab  send-to-output next
 qwertywmctl bind \$mod+Tab        focus-output next
 
@@ -313,13 +317,12 @@ chmod +x ~/.config/qwertywm/config
 # bar status script
 cat > ~/.config/qwertywm/bar-status.sh << 'BAR'
 #!/bin/sh
-qwertywmctl subscribe | while read -r line; do
-  echo "$line" | jq -c '
-    . as $d |
-    [ $d.outputs[] | "\(.workspace)" ] | join(" ") as $tags |
-    ( $d.windows[] | select(.focused) | .title ) as $title |
-    { text: "\($tags)  \($title)" }
-  ' 2>/dev/null || echo '{"text":""}'
+while true; do
+  data=$(qwertywmctl get state 2>/dev/null)
+  tags=$(echo "$data" | jq -r '[.outputs[] | .workspace] | join(" ")' 2>/dev/null)
+  title=$(echo "$data" | jq -r '[.windows[] | select(.focused) | .title][0]' 2>/dev/null)
+  echo '{"text":"'"$tags  $title"'"}'
+  sleep 1
 done
 BAR
 chmod +x ~/.config/qwertywm/bar-status.sh
@@ -332,15 +335,14 @@ cat > ~/.config/waybar/config << WBR
     "position": "bottom",
     "height": 24,
     "modules-left": ["custom/qwertywm"],
-    "modules-right": ["clock", "date"],
+    "modules-right": ["clock"],
     "custom/qwertywm": {
         "exec": "$HOME/.config/qwertywm/bar-status.sh",
         "format": "{}",
         "interval": 1,
         "restart-interval": 5
     },
-    "clock": { "interval": 60, "format": "{:%I:%M %p}", "tooltip": false },
-    "date": { "interval": 3600, "format": "{:%b %d}", "tooltip": false }
+    "clock": { "interval": 60, "format": "{:%b %d  %I:%M %p}", "tooltip": false }
 }
 WBR
 
@@ -385,25 +387,28 @@ export XDG_CURRENT_DESKTOP=qwertywm
 export XDG_SESSION_DESKTOP=qwertywm
 export MOZ_ENABLE_WAYLAND=1
 
-\${mon1:+wlr-randr --output \$mon1 --pos 0,0}
-\${mon2:+wlr-randr --output \$mon2 --pos 1920,0}
+# ─── MONITORES (editá si tenés otros nombres) ───
+wlr-randr --output ${mon1:-DP-1} --pos 0,0
+wlr-randr --output ${mon2:-HDMI-A-1} --pos 1920,0
 
-# Wallpaper (poné tu imagen en ~/wallpaper.png o cambiala)
+# ─── APPS DE FONDO ───
 # swaybg -i ~/wallpaper.png -m fill &
-
 wlsunset -t 4500 -S 22:00 -s 6:00 &
 waybar &
 wl-paste --watch cliphist store &
 mako &
 
+# ─── QWERTYWM ───
 qwertywm &
 qwertywmctl wait-for-socket
 . ~/.config/qwertywm/config
-\${mon1:+qwertywmctl focus-output \$mon1}
+
+# ─── WORKSPACES INICIALES ───
+qwertywmctl focus-output ${mon1:-DP-1}
 qwertywmctl view 1
-\${mon2:+qwertywmctl focus-output \$mon2}
-\${mon2:+qwertywmctl view 11}
-\${mon1:+qwertywmctl focus-output \$mon1}
+qwertywmctl focus-output ${mon2:-HDMI-A-1}
+qwertywmctl view 11
+qwertywmctl focus-output ${mon1:-DP-1}
 RIV
 chmod +x ~/.config/river/init
 
