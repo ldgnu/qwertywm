@@ -683,11 +683,14 @@ func (m *Model) setFloating(w *Window, floating bool) {
 	w.Floating = floating
 	if floating && w.FloatRect.Empty() {
 		area := m.outputAreaForWorkspace(w.Workspace)
+		if out := m.workspaceVisibleOn(w.Workspace); out != 0 && out != m.FocusedOutput {
+			if fo, ok := m.Outputs[m.FocusedOutput]; ok {
+				area = fo.Usable()
+			}
+		}
 		if w.ActualW > 0 && w.ActualH > 0 {
 			w.FloatRect = area.CenterIn(w.ActualW, w.ActualH)
 		} else {
-			// Dimensions unknown: let the window size itself, then center
-			// it when the dimensions event arrives.
 			w.FloatRect = area.CenterIn(area.W/2, area.H/2)
 			w.pendingFloatCenter = true
 		}

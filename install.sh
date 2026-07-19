@@ -423,6 +423,7 @@ cat > ~/.config/river/init << RIV
 #!/bin/sh
 export XDG_CURRENT_DESKTOP=qwertywm
 export XDG_SESSION_DESKTOP=qwertywm
+export DESKTOP_SESSION=qwertywm
 export MOZ_ENABLE_WAYLAND=1
 
 # ─── MONITORES (editá si tenés otros nombres) ───
@@ -472,7 +473,7 @@ sudo tee /usr/share/wayland-sessions/qwertywm.desktop > /dev/null << 'EOF'
 [Desktop Entry]
 Name=qwertywm
 Comment=River Wayland compositor with qwertywm window manager
-Exec=env XDG_CURRENT_DESKTOP=qwertywm XDG_SESSION_DESKTOP=qwertywm river
+Exec=env XDG_CURRENT_DESKTOP=qwertywm XDG_SESSION_DESKTOP=qwertywm DESKTOP_SESSION=qwertywm river
 Type=Application
 EOF
 
