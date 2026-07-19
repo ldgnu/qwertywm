@@ -3,8 +3,8 @@
 mod=Super
 terminal=kitty
 launcher=fuzzel
-mon_left="HDMI-A-1"
-mon_right="DP-1"
+mon_left="DP-1"
+mon_right="HDMI-A-1"
 # ─────────────────
 
 qwertywmctl set border-width 2
@@ -21,8 +21,8 @@ qwertywmctl keyboard-layout us
 
 qwertywmctl bind $mod+Return  spawn $terminal
 qwertywmctl bind $mod+d  spawn $launcher
-qwertywmctl bind $mod+e  spawn "kitty --title yazi yazi"
-qwertywmctl bind $mod+w  spawn qutebrowser
+qwertywmctl bind $mod+y  spawn "kitty --title yazi yazi"
+qwertywmctl bind $mod+b  spawn qutebrowser
 qwertywmctl bind $mod+q  close
 qwertywmctl bind $mod+Escape  exit
 qwertywmctl bind $mod+r  spawn 'killall qwertywm 2>/dev/null; qwertywm &; qwertywmctl wait-for-socket; . ~/.config/qwertywm/config &'
@@ -71,7 +71,7 @@ qwertywmctl bind XF86AudioMute        spawn "pamixer -t"
 qwertywmctl bind $mod+u  spawn kitty ncpamixer
 qwertywmctl bind $mod+o  spawn pavucontrol
 
-qwertywmctl bind $mod+b  spawn kitty bluetuith
+qwertywmctl bind $mod+Shift+u  spawn kitty bluetuith
 qwertywmctl bind $mod+Shift+b  spawn blueman-manager
 
 qwertywmctl bind $mod+c  spawn "kitty cliphist list | fuzzel | cliphist decode | wl-copy"

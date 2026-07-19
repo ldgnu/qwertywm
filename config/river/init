@@ -3,13 +3,13 @@ export XDG_CURRENT_DESKTOP=qwertywm
 export XDG_SESSION_DESKTOP=qwertywm
 export MOZ_ENABLE_WAYLAND=1
 
-# ─── MONITORES (editá los nombres si son otros) ───
-wlr-randr --output HDMI-A-1 --mode 1920x1080 --pos 0,0
-wlr-randr --output DP-1 --mode 1920x1080 --pos 1920,0 --transform 90
+# ─── MONITORES ───
+# DP-1: izquierda (principal)
+# HDMI-A-1: derecha (secundario)
+wlr-randr --output DP-1 --mode 1920x1080 --pos 0,0
+wlr-randr --output HDMI-A-1 --mode 1920x1080 --pos 1920,0
 
 # ─── APPS DE FONDO ───
-# swaybg -i ~/wallpaper.png -m fill &
-# wlsunset -t 4500 -S 22:00 -s 6:00 &
 waybar &
 wl-paste --watch cliphist store &
 mako &
@@ -20,9 +20,8 @@ qwertywmctl wait-for-socket
 . ~/.config/qwertywm/config
 
 # ─── WORKSPACES INICIALES ───
-qwertywmctl focus-output HDMI-A-1
-qwertywmctl view 1
 qwertywmctl focus-output DP-1
-qwertywmctl view 11
+qwertywmctl view 1
 qwertywmctl focus-output HDMI-A-1
-
+qwertywmctl view 11
+qwertywmctl focus-output DP-1
