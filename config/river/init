@@ -1,0 +1,22 @@
+#!/bin/sh
+
+export XDG_CURRENT_DESKTOP=qwertywm
+export XDG_SESSION_DESKTOP=qwertywm
+export MOZ_ENABLE_WAYLAND=1
+
+wlr-randr --output HDMI-A-1 --pos 0,0 --mode 1920x1080
+wlr-randr --output DP-1 --pos 1920,0 --mode 1920x1080 --transform 90
+
+~/Imágenes/wallpapers/random-wallpaper.sh next &
+wlsunset -t 4500 -S 22:00 -s 6:00 &
+waybar &
+wl-paste --watch cliphist store &
+mako &
+qwertywm &
+qwertywmctl wait-for-socket
+. ~/.config/qwertywm/config
+
+qwertywmctl focus-output HDMI-A-1
+qwertywmctl view 1
+qwertywmctl focus-output DP-1
+qwertywmctl view 10

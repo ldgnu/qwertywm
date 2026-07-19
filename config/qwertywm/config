@@ -1,0 +1,130 @@
+#!/bin/sh
+# qwertywm config
+# Editá esto y reiniciá con Super+r
+
+mod=Super
+terminal=kitty
+launcher=fuzzel
+
+# ========== APARIENCIA ==========
+qwertywmctl set border-width 2
+qwertywmctl set border-color-focused   0x00aa00
+qwertywmctl set border-color-unfocused 0x555555
+qwertywmctl set smart-borders on
+qwertywmctl set gaps 4 8
+qwertywmctl set smart-gaps on
+qwertywmctl set main-ratio 0.5
+qwertywmctl set main-count 1
+qwertywmctl set main-location left
+qwertywmctl workspace-mode independent
+qwertywmctl keyboard-layout latam
+qwertywmctl set focus-follows-cursor on
+
+# ========== LANZADORES ==========
+qwertywmctl bind $mod+d       spawn $launcher
+qwertywmctl bind $mod+e       spawn "kitty --title yazi yazi"
+qwertywmctl bind $mod+c       spawn "cliphist list | fuzzel --prompt='clipboard: ' | cliphist decode | wl-copy"
+qwertywmctl bind $mod+w       spawn qutebrowser
+qwertywmctl bind $mod+t       spawn ~/.config/themes/theme-switcher.sh
+qwertywmctl bind $mod+Shift+t spawn "ls ~/.config/themes/*.conf | shuf -n1 | xargs -I{} basename {} .conf | xargs ~/.config/themes/apply-theme.sh"
+qwertywmctl bind $mod+Shift+comma spawn ~/.config/themes/cycle-theme.sh prev
+qwertywmctl bind $mod+Shift+period spawn ~/.config/themes/cycle-theme.sh next
+qwertywmctl bind $mod+u       spawn "kitty --title ncpamixer ncpamixer"
+qwertywmctl bind $mod+b       spawn "kitty --title bluetuith bluetuith"
+qwertywmctl bind $mod+q       close
+
+qwertywmctl bind $mod+Shift+Escape spawn ~/.config/themes/power-menu.sh
+qwertywmctl bind $mod+r       spawn ~/.config/qwertywm/reload.sh
+
+# ========== NAVEGACIÓN (vim + flechas) ==========
+qwertywmctl bind $mod+h       focus prev
+qwertywmctl bind $mod+j       focus next
+qwertywmctl bind $mod+k       focus prev
+qwertywmctl bind $mod+l       focus next
+qwertywmctl bind $mod+Left    focus prev
+qwertywmctl bind $mod+Down    focus next
+qwertywmctl bind $mod+Up      focus prev
+qwertywmctl bind $mod+Right   focus next
+qwertywmctl bind $mod+f       toggle-fullscreen
+
+# ========== SISTEMA ==========
+qwertywmctl bind $mod+Shift+x  spawn hyprlock
+qwertywmctl bind $mod+n        spawn "pkill wlsunset; wlsunset -t 4500 -S 22:00 -s 6:00 &"
+
+# ========== VENTANAS ==========
+qwertywmctl bind $mod+Shift+space toggle-float
+qwertywmctl bind $mod+Return      spawn $terminal
+qwertywmctl bind $mod+Shift+Tab   send-to-output next
+qwertywmctl bind $mod+Shift+Left  spawn "qwertywmctl send-to-output left && qwertywmctl focus-output left"
+qwertywmctl bind $mod+Shift+Right spawn "qwertywmctl send-to-output right && qwertywmctl focus-output right"
+qwertywmctl bind $mod+Shift+h     spawn "qwertywmctl send-to-output left && qwertywmctl focus-output left"
+qwertywmctl bind $mod+Shift+l     spawn "qwertywmctl send-to-output right && qwertywmctl focus-output right"
+
+# ========== RESIZE ==========
+qwertywmctl bind $mod+Ctrl+h      spawn "qwertywmctl resize horizontal -10"
+qwertywmctl bind $mod+Ctrl+l      spawn "qwertywmctl resize horizontal 10"
+qwertywmctl bind $mod+Ctrl+k      spawn "qwertywmctl resize vertical -10"
+qwertywmctl bind $mod+Ctrl+j      spawn "qwertywmctl resize vertical 10"
+qwertywmctl bind Alt+Ctrl+h       spawn "qwertywmctl resize horizontal -10"
+qwertywmctl bind Alt+Ctrl+l       spawn "qwertywmctl resize horizontal 10"
+qwertywmctl bind Alt+Ctrl+k       spawn "qwertywmctl resize vertical -10"
+qwertywmctl bind Alt+Ctrl+j       spawn "qwertywmctl resize vertical 10"
+
+# ========== MULTIMEDIA ==========
+qwertywmctl bind $mod+m       spawn "kitty --title minitone minitone"
+qwertywmctl bind $mod+z       spawn "playerctl play-pause"
+qwertywmctl bind $mod+x       spawn "playerctl next"
+qwertywmctl bind Alt+Shift+z  spawn "curl -s http://localhost:10767/playback/playpause -X POST > /dev/null"
+qwertywmctl bind Alt+Shift+x  spawn "curl -s http://localhost:10767/playback/next -X POST > /dev/null"
+qwertywmctl bind XF86AudioRaiseVolume spawn "pamixer -i 5"
+qwertywmctl bind XF86AudioLowerVolume spawn "pamixer -d 5"
+qwertywmctl bind XF86AudioMute        spawn "pamixer -t"
+
+# ========== LAYOUT ==========
+qwertywmctl bind $mod+space  cycle-layout monocle,left,top
+qwertywmctl bind $mod+v      cycle-layout left,top
+qwertywmctl bind $mod+Shift+Return zoom
+qwertywmctl bind $mod+Shift+slash  swap next
+
+# ========== AUDIO DEVICES ==========
+qwertywmctl bind Alt+o       spawn "pactl set-default-sink alsa_output.usb-DODO_Electronics_Inc._Redragon_Gaming_Headset-00.analog-stereo && pactl set-default-source alsa_input.usb-DODO_Electronics_Inc._Redragon_Gaming_Headset-00.mono-fallback && notify-send 'Auricular por defecto'"
+qwertywmctl bind Alt+Shift+o spawn "pactl set-default-sink alsa_output.pci-0000_00_1f.3.analog-stereo && pactl set-default-source alsa_input.pci-0000_00_1f.3.analog-stereo && notify-send 'Sonido onboard por defecto'"
+
+# Wallpapers
+qwertywmctl bind Alt+Shift+Right  spawn ~/Imágenes/wallpapers/random-wallpaper.sh next
+qwertywmctl bind Alt+Shift+Left   spawn ~/Imágenes/wallpapers/random-wallpaper.sh prev
+qwertywmctl bind Alt+Shift+h      spawn ~/Imágenes/wallpapers/random-wallpaper.sh delete
+
+
+# ========== NAVEGACIÓN ENTRE OUTPUTS ==========
+qwertywmctl bind $mod+Tab focus-output next
+
+# ========== ESCRITORIOS FIJOS ==========
+# HDMI-A-1: Super+1..9 = workspaces 1-9 (siempre en HDMI)
+for i in 1 2 3 4 5 6 7 8 9; do
+    qwertywmctl bind $mod+$i spawn "qwertywmctl focus-output HDMI-A-1 && qwertywmctl view $i"
+    qwertywmctl bind $mod+Shift+$i spawn "qwertywmctl focus-output HDMI-A-1 && qwertywmctl send $i"
+done
+
+# DP-1: Alt+0..9 = workspaces 10-19 (siempre en DP)
+for i in 0 1 2 3 4 5 6 7 8 9; do
+    n=$((i + 10))
+    qwertywmctl bind Alt+$i spawn "qwertywmctl focus-output DP-1 && qwertywmctl view $n"
+    qwertywmctl bind Alt+Shift+$i spawn "qwertywmctl focus-output DP-1 && qwertywmctl send $n"
+done
+
+# ========== CAPTURAS ==========
+qwertywmctl bind Print          spawn 'grim -g "$(slurp)" - | wl-copy'
+qwertywmctl bind $mod+Shift+p   spawn 'grim -g "$(slurp)" - | swappy -f -'
+
+# ========== REGLAS FLOTANTES ==========
+qwertywmctl rule add -app-id pavucontrol float
+qwertywmctl rule add -title ncpamixer float
+qwertywmctl rule add -title bluetuith float
+qwertywmctl rule add -title minitone float
+qwertywmctl rule add -app-id minitone float
+qwertywmctl rule add -title ncpamixer float
+
+# ========== MOUSE ==========
+qwertywmctl bind-pointer $mod+Left  move
+qwertywmctl bind-pointer $mod+Right resize

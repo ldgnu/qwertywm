@@ -1,0 +1,67 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 26,
+    "modules-left": [
+        "custom/qwertywm",
+        "custom/conn"
+    ],
+    "modules-center": [
+        "custom/minitone",
+        "custom/weather"
+    ],
+    "modules-right": [
+        "custom/tailscale",
+        "custom/cpu",
+        "custom/gpu",
+        "custom/date",
+        "clock"
+    ],
+    "custom/minitone": {
+        "exec": "~/.config/waybar/scripts/minitone.sh",
+        "interval": 5,
+        "return-type": "json",
+        "format": "{}"
+    },
+    "custom/conn": {
+        "exec": "~/.config/waybar/scripts/conn.sh",
+        "interval": 30,
+        "return-type": "json"
+    },
+    "clock": {
+        "interval": 60,
+        "format": "{:%H:%M}",
+        "tooltip": false
+    },
+    "custom/date": {
+        "exec": "date '+%b %d'",
+        "interval": 3600
+    },
+    "custom/cpu": {
+        "exec": "~/.config/waybar/scripts/cpu.sh",
+        "interval": 5,
+        "return-type": "json"
+    },
+    "custom/gpu": {
+        "exec": "~/.config/waybar/scripts/gpu.sh",
+        "interval": 5,
+        "return-type": "json"
+    },
+    "custom/tailscale": {
+        "exec": "~/.config/waybar/scripts/tailscale.sh",
+        "interval": 30,
+        "return-type": "json"
+    },
+    "custom/weather": {
+        "exec": "~/.config/waybar/scripts/weather.sh",
+        "interval": 1800,
+        "return-type": "json"
+    },
+    "custom/qwertywm": {
+        "exec": "~/.config/qwertywm/bar-status.sh",
+        "interval": 1,
+        "restart-interval": 5,
+        "return-type": "text",
+        "markup": "none"
+    }
+}
