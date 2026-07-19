@@ -9,8 +9,7 @@
         "exec": "~/.config/qwertywm/bar-status.sh",
         "interval": 1,
         "restart-interval": 5,
-        "return-type": "text",
-        "markup": "none"
+        "return-type": "json"
     },
     "custom/conn": {
         "exec": "~/.config/waybar/scripts/conn.sh",
