@@ -20,6 +20,7 @@ qwertywmctl set smart-gaps on
 qwertywmctl set main-ratio 0.5
 qwertywmctl set main-count 1
 qwertywmctl set main-location left
+qwertywmctl set focus-follows-cursor on
 qwertywmctl workspace-mode independent
 qwertywmctl keyboard-layout us
 
