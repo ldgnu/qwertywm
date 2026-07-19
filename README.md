@@ -1,137 +1,39 @@
-# qwertywm
+<img width="1914" height="1079" alt="imagen" src="https://github.com/user-attachments/assets/e33b5b7f-71ed-4b55-983e-dc1b6f79dd95" /># qwertywm 🚧
 
+> **⚠️ Estado: desarrollo activo.** Puede tener bugs, cosas rotas y APIs que
+> cambian sin aviso. Si te lo bajás, bienvenido, pero no hay garantías de que
+> ande en tu setup. PRs y issues bienvenidos.
 
+Un window manager dinámico estilo xmonad para [river](https://codeberg.org/river/river),
+escrito en Go. Tiling dinámico, configuración programática vía socket unix,
+soporte multi-monitor de primera clase.
 
+<img width="1918" height="1079" alt="imagen" src="https://github.com/user-attachments/assets/44bae52a-df8e-474b-b465-d75aa3746cc5" />
+<img width="1913" height="1051" alt="imagen" src="https://github.com/user-attachments/assets/7eeb694a-d812-43a9-8541-29ef05e92f32" />
 
-Dynamic tiling window manager for the [River](https://codeberg.org/river/river) Wayland compositor.
-Forked from [weir](https://github.com/psanford/weir).
+## Instalación rápida
 
-<img width="1918" alt="qwertywm escritorios" src="https://github.com/user-attachments/assets/44bae52a-df8e-474b-b465-d75aa3746cc5" />
-<img width="1914" alt="qwertywm" src="https://github.com/user-attachments/assets/e33b5b7f-71ed-4b55-983e-dc1b6f79dd95" />
-<img width="1913" alt="qwertywm barra" src="https://github.com/user-attachments/assets/7eeb694a-d812-43a9-8541-29ef05e92f32" />
-
-
-## ⚡ Quick Install (Arch Linux)
-
-### Desde AUR (recomendado)
-```bash
+### AUR (Arch Linux)
+```sh
 paru -S qwertywm
-# o con yay:
+# o
 yay -S qwertywm
 ```
 
-### Manual
-```bash
+### Interactive installer (recomendado)
+
+Te pregunta todo: terminal, colores, teclado, monitores... y deja todo listo.
+
+```sh
 git clone https://github.com/ldgnu/qwertywm
 cd qwertywm
-./setup.sh
+./install.sh
 ```
 
-El `setup.sh` instala todo: dependencias, compila, copia configs, y agrega la sesión al display manager.
+### Manual
 
----
-
-## 📋 Requisitos
-
-- **Arch Linux** (los paquetes están en pacman/AUR)
-- **River** 0.4+ (compositor Wayland)
-- **kitty** (terminal)
-- **fuzzel** (lanzador de aplicaciones)
-- **waybar** (barra de estado)
-- **foot** (terminal alternativa)
-- **wlr-randr** (configuración de monitores)
-- **ttf-liberation** (fuente TTY)
-- **Go** (para compilar)
-
----
-
-## 🚀 Cómo usar
-
-### Desde display manager (GDM, SDDM, LightDM, etc.)
-1. Cerrar sesión
-2. Seleccionar **qwertywm** del menú de sesiones
-3. Iniciar sesión
-
-### Desde TTY
-```bash
-XDG_RUNTIME_DIR=/run/user/$(id -u) river
-```
-
----
-
-## 🎮 Atajos
-
-| Atajo | Acción |
-|-------|--------|
-| **Super+Enter** | Terminal (kitty) |
-| **Super+d** | Lanzador (fuzzel) |
-| **Super+q** | Cerrar ventana |
-| **Super+Escape** | Salir de River |
-
-### Navegación (vim)
-| Atajo | Acción |
-|-------|--------|
-| **Super+j** | Foco siguiente ventana |
-| **Super+k** | Foco anterior ventana |
-| **Super+h** | Foco anterior (alternativo) |
-| **Super+l** | Foco siguiente (alternativo) |
-
-### Layout
-| Atajo | Acción |
-|-------|--------|
-| **Super+Space** | Ciclar layout (monocle, left, top) |
-| **Super+f** | Fullscreen |
-
-### Escritorios
-| Atajo | Acción |
-|-------|--------|
-| **Super+1..0** | Escritorios 1-10 |
-| **Super+Shift+1..0** | Mandar ventana a escritorio 1-10 |
-| **Alt+1..0** | Escritorios 11-20 |
-| **Alt+Shift+1..0** | Mandar ventana a escritorio 11-20 |
-
-### Monitores
-| Atajo | Acción |
-|-------|--------|
-| **Super+w** | Focus DP-1 (izquierda) |
-| **Super+e** | Focus HDMI-A-1 (derecha) |
-| **Super+Shift+h** | Mandar ventana a DP-1 |
-| **Super+Shift+l** | Mandar ventana a HDMI |
-
-### Mouse
-| Atajo | Acción |
-|-------|--------|
-| **Super+Click izquierdo** | Mover ventana |
-| **Super+Click derecho** | Redimensionar |
-
----
-
-## ⚙️ Configuración
-
-Todo se configura en un solo archivo:
-
-```bash
-nano ~/.config/qwertywm/config
-```
-
-Después de editar, recargar con **Super+r** (mata el proceso y lo reinicia con la nueva config).
-
-### Colores
-Estilo TTY clásico: fondo negro, texto gris, bordes verdes.
-Todo configurable en `~/.config/qwertywm/config`.
-
-### Barra (waybar)
-- Izquierda: números de escritorio
-- Centro: título de la ventana
-- Derecha: hora AM/PM y fecha
-
-Config en `~/.config/waybar/config`.
-
----
-
-## 🏗️ Build manual
-
-```bash
+```sh
+sudo pacman -S go river waybar fuzzel kitty foot ttf-liberation wlr-randr
 git clone https://github.com/ldgnu/qwertywm
 cd qwertywm
 go build ./cmd/qwertywm
@@ -139,58 +41,230 @@ go build -o qwertywmctl ./cmd/qwertywmctl
 sudo cp qwertywm qwertywmctl /usr/local/bin/
 ```
 
-Luego copiar configs de `config/` a `~/.config/`.
+Después copiá las configs de `config/` a `~/.config/`.
 
 ---
 
-## 📁 Estructura
+## Atajos principales
 
-```
-qwertywm/
-├── cmd/
-│   ├── qwertywm/        # WM principal
-│   ├── qwertywmctl/     # CLI de control
-│   └── wmsim/           # Simulador ASCII
-├── core/                # Motor (modelo, layouts, comandos)
-├── bridge/              # Adaptador protocolo River
-├── ipc/                 # Socket de control Unix
-├── wire/                # Protocolo Wayland puro
-├── protocol/            # XML del protocolo
-├── config/              # Configuraciones de ejemplo
-│   ├── river/           # Init de River
-│   ├── qwertywm/        # Atajos y settings
-│   ├── waybar/          # Barra de estado
-│   ├── fuzzel/          # Lanzador
-│   └── foot/            # Terminal alternativa
-├── setup.sh             # Instalador automático
-└── PKGBUILD             # Paquete AUR
-```
+| Tecla | Acción |
+|-------|--------|
+| `Super+Enter` | Terminal (kitty) |
+| `Super+d` | Lanzador (fuzzel) |
+| `Super+j/k` | Foco siguiente/anterior |
+| `Super+1..0` | Escritorios 1-10 |
+| `Alt+1..0` | Escritorios 11-20 |
+| `Super+Space` | Cambiar layout |
+| `Super+f` | Fullscreen |
+| `Super+r` | Recargar config |
+| `Super+Escape` | Salir |
 
 ---
 
-## 📦 AUR
+## Créditos
 
-El PKGBUILD está en el repo. Para mantenerlo actualizado:
+**qwertywm** es un fork de [weir](https://github.com/psanford/weir) por
+[psanford](https://github.com/psanford). El proyecto original fue renombrado
+y modificado para uso personal por [ldgnu](https://github.com/ldgnu).
 
-```bash
-git clone ssh://aur@aur.archlinux.org/qwertywm.git
+Gracias a psanford por el laburazo del core, la arquitectura limpia y toda la
+base sólida.
+
+---
+
+## Requisitos
+
+- [river](https://codeberg.org/river/river) ≥ 0.4 (compositor Wayland)
+- Go ≥ 1.21 (solo para compilar)
+- `wayland` (protocolos)
+- `wayland-protocols`
+- `libxkbcommon` (para `keyboard-layout`)
+
+### Dependencias opcionales (para el setup completo)
+
+| Paquete | Uso |
+|---------|-----|
+| `waybar` | Barra de estado |
+| `fuzzel` | Lanzador de apps / menú de temas |
+| `wl-clipboard` | Clipboard (wl-copy, wl-paste) |
+| `cliphist` | Historial de clipboard |
+| `kitty` | Terminal |
+| `qutebrowser` | Navegador |
+| `pavucontrol` | Control de audio |
+| `pamixer` | Volumen desde tecla |
+| `playerctl` | Control de reproducción (play/pause, next) |
+| `blueman` | Bluetooth (blueman-manager) |
+| `bluetuith` | Bluetooth TUI |
+| `ncpamixer` | Audio mixer TUI |
+| `swaybg` | Wallpaper |
+| `hyprlock` | Bloqueo de pantalla |
+| `grim` + `slurp` + `swappy` | Capturas de pantalla |
+| `copyq` | Clipboard GUI |
+| `jq` | Procesar JSON desde scripts |
+| `curl` | Clima en waybar |
+| `ttf-liberation` | Tipografía retro terminal |
+| `fastfetch` | Info del sistema |
+
+---
+
+## Instalación
+
+### Arch Linux / CachyOS
+
+```sh
+# Dependencias
+sudo pacman -S go river wayland wayland-protocols libxkbcommon
+
+# Compilar e instalar
+git clone https://github.com/ldgnu/qwertywm.git
 cd qwertywm
-cp ~/Proyectos/qwertywm/PKGBUILD .
-cp ~/Proyectos/qwertywm/.SRCINFO .
-makepkg --printsrcinfo > .SRCINFO
-git add -A && git commit -m "update" && git push
+./build.sh
+sudo cp qwertywm qwertywmctl /usr/local/bin/
+
+# (opcional) Dependencias extras para el setup completo
+sudo pacman -S waybar fuzzel wl-clipboard cliphist kitty qutebrowser \
+  pavucontrol pamixer playerctl blueman bluetuith ncpamixer swaybg \
+  hyprlock grim slurp swappy copyq jq curl ttf-liberation fastfetch
+```
+
+### Script rápido (cualquier distro con Go)
+
+```sh
+curl -sSL https://github.com/ldgnu/qwertywm/archive/main.tar.gz | tar xz
+cd qwertywm-main
+./build.sh
+sudo cp qwertywm qwertywmctl /usr/local/bin/
 ```
 
 ---
 
-## 🧪 Tests
+## Configuración
 
-```bash
-go test ./...
+qwertywm se configura con comandos de `qwertywmctl` en tu init script de river.
+
+### Init básico (`~/.config/river/init`)
+
+```sh
+#!/bin/sh
+export XDG_CURRENT_DESKTOP=qwertywm
+export XDG_SESSION_DESKTOP=qwertywm
+
+wlr-randr --output HDMI-A-1 --pos 0,0 --mode 1920x1080
+wlr-randr --output DP-1 --pos 1920,0 --mode 1920x1080 --transform 90
+
+swaybg -o HDMI-A-1 -i ~/wallpaper.png -m fill &
+swaybg -o DP-1 -i ~/wallpaper.png -m fill &
+waybar &
+wl-paste --watch cliphist store &
+qwertywm &
+qwertywmctl wait-for-socket
+. ~/.config/qwertywm/config
+qwertywmctl focus-output HDMI-A-1 && qwertywmctl view 1
+qwertywmctl focus-output DP-1 && qwertywmctl view 11
+```
+
+### Config de qwertywm (`~/.config/qwertywm/config`)
+
+Ejemplo completo con binds, apariencia y reglas flotantes:
+
+```sh
+#!/bin/sh
+mod=Super
+terminal=kitty
+launcher=fuzzel
+
+# Apariencia
+qwertywmctl set border-width 2
+qwertywmctl set border-color-focused   0x00aa00
+qwertywmctl set border-color-unfocused 0x555555
+qwertywmctl set gaps 4 8
+qwertywmctl set main-ratio 0.5
+qwertywmctl set main-count 1
+qwertywmctl set main-location left
+qwertywmctl workspace-mode independent
+
+# Lanzadores
+qwertywmctl bind $mod+Return  spawn $terminal
+qwertywmctl bind $mod+d       spawn $launcher
+qwertywmctl bind $mod+q       close
+qwertywmctl bind $mod+Escape  exit
+
+# Navegación vim
+qwertywmctl bind $mod+h  focus prev
+qwertywmctl bind $mod+j  focus next
+qwertywmctl bind $mod+k  focus prev
+qwertywmctl bind $mod+l  focus next
+
+# Layout
+qwertywmctl bind $mod+space  cycle-layout monocle,left,top
+qwertywmctl bind $mod+f      toggle-fullscreen
+
+# Mouse
+qwertywmctl bind-pointer $mod+Left  move
+qwertywmctl bind-pointer $mod+Right resize
+
+# Recargar
+qwertywmctl bind $mod+r spawn 'killall qwertywm 2>/dev/null; qwertywm &; qwertywmctl wait-for-socket; . ~/.config/qwertywm/config &'
+
+# Escritorios 1-10
+for i in 1 2 3 4 5 6 7 8 9; do
+    qwertywmctl bind $mod+$i view $i
+    qwertywmctl bind $mod+Shift+$i send $i
+done
+qwertywmctl bind $mod+0  view 10
+qwertywmctl bind $mod+Shift+0  send 10
+
+# Escritorios 11-20 (Alt)
+for i in 1 2 3 4 5 6 7 8 9; do
+    n=$((i + 10))
+    qwertywmctl bind Alt+$i view $n
+    qwertywmctl bind Alt+Shift+$i send $n
+done
+qwertywmctl bind Alt+0  view 20
+qwertywmctl bind Alt+Shift+0  send 20
 ```
 
 ---
 
-## 📝 Licencia
+## Uso de qwertywmctl
 
-MIT
+```sh
+qwertywmctl help                    # Todos los comandos
+qwertywmctl focus next              # Siguiente ventana
+qwertywmctl focus prev              # Ventana anterior
+qwertywmctl view 3                  # Ir a workspace 3
+qwertywmctl send 5                  # Ventana al workspace 5
+qwertywmctl get state               # Estado JSON
+qwertywmctl subscribe               # Eventos en tiempo real
+qwertywmctl cycle-layout monocle,left,top  # Layouts
+qwertywmctl toggle-float            # Flotar/desflotar
+qwertywmctl toggle-fullscreen       # Fullscreen
+qwertywmctl close                   # Cerrar ventana
+qwertywmctl spawn kitty             # Abrir app
+qwertywmctl set gaps 4 8            # Configurar gaps
+qwertywmctl workspace-mode independent  # Modo workspaces independientes
+```
+
+---
+
+## Estructura del proyecto
+
+| Path | Qué es |
+| --- | --- |
+| `core/` | State machine: modelo, layouts, comandos. Go puro, sin Wayland. |
+| `bridge/` | Adaptador del protocolo river. Conecta el core con el compositor. |
+| `ipc/` | Socket unix + JSON: commands, queries, subscriptions. |
+| `cmd/qwertywm/` | El binary del WM. |
+| `cmd/qwertywmctl/` | El CLI para controlar qwertywm. |
+| `wire/` | Cliente Wayland en Go puro, sin cgo. |
+| `protocol/` | XMLs del protocolo vendeados. |
+| `scripts/` | Scripts de instalación para Arch y Ubuntu. |
+| `install.sh` | Instalador interactivo (te pregunta todo). |
+| `config/` | Configs de ejemplo (river, waybar, fuzzel, foot). |
+| `PKGBUILD` | Paquete AUR. |
+
+---
+
+## Licencia
+
+MIT. Ver [LICENSE](LICENSE). Basado en [weir](https://github.com/psanford/weir) por psanford.
