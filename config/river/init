@@ -3,7 +3,7 @@ export XDG_CURRENT_DESKTOP=qwertywm
 export XDG_SESSION_DESKTOP=qwertywm
 export DESKTOP_SESSION=qwertywm
 export MOZ_ENABLE_WAYLAND=1
-export LD_PRELOAD=/usr/local/lib/libqwertywm-rename.so
+unset LD_PRELOAD
 
 # ─── MONITORES ───
 # DP-1: izquierda (principal)
