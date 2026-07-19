@@ -23,14 +23,14 @@ fi
 clear
 cat << "EOF"
 
-   ██████  ██     ██ ███████ ██████  ████████ ██    ██ ██     ██ ██    ██
-  ██       ██     ██ ██      ██   ██    ██    ██    ██ ██     ██  ██  ██
-  ██   ███ ██  █  ██ █████   ██████     ██     ██  ██  ██  █  ██   ████
-  ██    ██ ██ ███ ██ ██      ██   ██    ██      ████   ██ ███ ██    ██
-   ██████   ███ ███  ███████ ██   ██    ██       ██     ███ ███  ██    ██
+██   ██  ██████  ███████ ██████  ████████ ██    ██ ██     ██ ███    ███
+██  ██  ██       ██      ██   ██    ██     ██  ██  ██     ██ ████  ████
+█████   ██   ███ █████   ██████     ██      ████   ██  █  ██ ██ ████ ██
+██  ██  ██    ██ ██      ██   ██    ██       ██    ██ ███ ██ ██  ██  ██
+██   ██  ██████  ███████ ██   ██    ██       ██     ███ ███  ██      ██
 
-                    qwertywm — Window Manager para River
-                Hecho con 💚 por ldgnu (+IA helper)
+                 qwertywm  —  Window Manager para River
+                Hecho con 💚  por ldgnu (+IA helper)
 EOF
 echo ""
 echo "  Te voy a preguntar un par de cositas y dejo todo listo."
