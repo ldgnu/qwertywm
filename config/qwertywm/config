@@ -51,20 +51,22 @@ qwertywmctl bind $mod+e  focus-output $mon_right
 qwertywmctl bind $mod+Shift+Tab  send-to-output next
 qwertywmctl bind $mod+Tab        focus-output next
 
+# HDMI-A-1: Super+1..0 = workspaces 1-10 (siempre en HDMI)
 for i in 1 2 3 4 5 6 7 8 9; do
-    qwertywmctl bind $mod+$i view $i
-    qwertywmctl bind $mod+Shift+$i send $i
+    qwertywmctl bind $mod+$i spawn "qwertywmctl focus-output HDMI-A-1 && qwertywmctl view $i"
+    qwertywmctl bind $mod+Shift+$i spawn "qwertywmctl focus-output HDMI-A-1 && qwertywmctl send $i"
 done
-qwertywmctl bind $mod+0  view 10
-qwertywmctl bind $mod+Shift+0  send 10
+qwertywmctl bind $mod+0 spawn "qwertywmctl focus-output HDMI-A-1 && qwertywmctl view 10"
+qwertywmctl bind $mod+Shift+0 spawn "qwertywmctl focus-output HDMI-A-1 && qwertywmctl send 10"
 
+# DP-1: Alt+1..0 = workspaces 11-20 (siempre en DP)
 for i in 1 2 3 4 5 6 7 8 9; do
     n=$((i + 10))
-    qwertywmctl bind Alt+$i view $n
-    qwertywmctl bind Alt+Shift+$i send $n
+    qwertywmctl bind Alt+$i spawn "qwertywmctl focus-output DP-1 && qwertywmctl view $n"
+    qwertywmctl bind Alt+Shift+$i spawn "qwertywmctl focus-output DP-1 && qwertywmctl send $n"
 done
-qwertywmctl bind Alt+0  view 20
-qwertywmctl bind Alt+Shift+0  send 20
+qwertywmctl bind Alt+0 spawn "qwertywmctl focus-output DP-1 && qwertywmctl view 20"
+qwertywmctl bind Alt+Shift+0 spawn "qwertywmctl focus-output DP-1 && qwertywmctl send 20"
 
 qwertywmctl bind $mod+z  spawn "playerctl play-pause"
 qwertywmctl bind $mod+x  spawn "playerctl next"
