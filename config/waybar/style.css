@@ -1,5 +1,25 @@
-* { font-family: "Liberation Mono"; font-size: 12px; }
-window#waybar, #custom-qwertywm, #clock, #date {
-    background: #000000; color: #c0c0c0; border: none;
+* {
+    font-family: "Liberation Mono";
+    font-size: 12px;
+    min-height: 0;
 }
-#custom-qwertywm, #clock, #date { padding: 0 6px; }
+
+window#waybar {
+    background: #000000;
+    color: #c0c0c0;
+    border: none;
+}
+
+#custom-qwertywm,
+#custom-conn,
+#custom-tailscale,
+#custom-cpu,
+#custom-gpu,
+#custom-weather,
+#custom-date,
+#clock {
+    color: #c0c0c0;
+    background: #000000;
+    padding: 0 8px;
+    border: none;
+}
