@@ -140,10 +140,31 @@ echo "╔═══════════════════════�
 echo "║  6. MONITORES                      ║"
 echo "╚════════════════════════════════════╝"
 echo ""
-multi=$(ask "¿Tenés más de un monitor? (s/N)" n)
+echo "  Ejecutá 'wlr-randr' en una terminal para ver"
+echo "  los nombres y resoluciones disponibles."
+echo ""
+
+ask_monitor() {
+    local label="$1" default_name="$2"
+    local name res rotate
+    name=$(ask "  Nombre del monitor $label" "$default_name")
+    res=$(ask "  Resolución (Enter = 1920x1080)" "1920x1080")
+    rotate=$(ask "  ¿Rotado 90°? (s/N)" n)
+    echo "$name|$res|$rotate"
+}
+
+mon_data=$(ask_monitor "izquierdo/único" "HDMI-A-1")
+mon1_name=$(echo "$mon_data" | cut -d'|' -f1)
+mon1_res=$(echo "$mon_data" | cut -d'|' -f2)
+mon1_rotate=$(echo "$mon_data" | cut -d'|' -f3)
+
+multi=$(ask "¿Tenés otro monitor? (s/N)" n)
+mon2_name=""; mon2_res=""; mon2_rotate=""
 if [[ "$multi" =~ ^[sS] ]]; then
-    mon1=$(ask "Monitor izquierdo (nombre)" DP-1)
-    mon2=$(ask "Monitor derecho (nombre)" HDMI-A-1)
+    mon_data=$(ask_monitor "derecho" "DP-1")
+    mon2_name=$(echo "$mon_data" | cut -d'|' -f1)
+    mon2_res=$(echo "$mon_data" | cut -d'|' -f2)
+    mon2_rotate=$(echo "$mon_data" | cut -d'|' -f3)
 fi
 
 echo ""
@@ -212,8 +233,8 @@ cat > ~/.config/qwertywm/config << CFG
 mod=Super
 terminal=$terminal
 launcher=${launcher:-none}
-mon_left="${mon1:-DP-1}"
-mon_right="${mon2:-HDMI-A-1}"
+mon_left="${mon1_name}"
+mon_right="${mon2_name:-}"
 # ─────────────────
 
 qwertywmctl set border-width 2
@@ -254,58 +275,70 @@ qwertywmctl bind \$mod+Ctrl+${f_l} spawn "qwertywmctl resize horizontal 10"
 qwertywmctl bind \$mod+Ctrl+${f_r} spawn "qwertywmctl resize horizontal -10"
 qwertywmctl bind \$mod+Ctrl+${f_d} spawn "qwertywmctl resize vertical 10"
 qwertywmctl bind \$mod+Ctrl+${f_u} spawn "qwertywmctl resize vertical -10"
+CFG
 
-# Monitores
+# Monitores (solo si hay segundo)
+cat >> ~/.config/qwertywm/config << CFG
 qwertywmctl bind \$mod+w  focus-output \$mon_left
+CFG
+if [ -n "$mon2_name" ]; then
+    cat >> ~/.config/qwertywm/config << CFG
 qwertywmctl bind \$mod+e  focus-output \$mon_right
 qwertywmctl bind \$mod+Shift+Tab  send-to-output next
 qwertywmctl bind \$mod+Tab        focus-output next
+CFG
+fi
 
+cat >> ~/.config/qwertywm/config << 'CFG'
 # Escritorios 1-10 (Super)
 for i in 1 2 3 4 5 6 7 8 9; do
-    qwertywmctl bind \$mod+\$i view \$i
-    qwertywmctl bind \$mod+Shift+\$i send \$i
+    qwertywmctl bind $mod+$i view $i
+    qwertywmctl bind $mod+Shift+$i send $i
 done
-qwertywmctl bind \$mod+0  view 10
-qwertywmctl bind \$mod+Shift+0  send 10
+qwertywmctl bind $mod+0  view 10
+qwertywmctl bind $mod+Shift+0  send 10
 
 # Escritorios 11-20 (Alt)
 for i in 1 2 3 4 5 6 7 8 9; do
-    n=\$((i + 10))
-    qwertywmctl bind Alt+\$i view \$n
-    qwertywmctl bind Alt+Shift+\$i send \$n
+    n=$((i + 10))
+    qwertywmctl bind Alt+$i view $n
+    qwertywmctl bind Alt+Shift+$i send $n
 done
 qwertywmctl bind Alt+0  view 20
 qwertywmctl bind Alt+Shift+0  send 20
+CFG
 
+# El resto (multimedia, audio, bt, clipboard, capturas, mouse, reglas)
+# lo copiamos del template fijo para no repetirlo inline
+cat >> ~/.config/qwertywm/config << 'CFG'
 # Multimedia
-qwertywmctl bind \$mod+z  spawn "playerctl play-pause"
-qwertywmctl bind \$mod+x  spawn "playerctl next"
+qwertywmctl bind $mod+z  spawn "playerctl play-pause"
+qwertywmctl bind $mod+x  spawn "playerctl next"
 qwertywmctl bind XF86AudioRaiseVolume spawn "pamixer -i 5"
 qwertywmctl bind XF86AudioLowerVolume spawn "pamixer -d 5"
 qwertywmctl bind XF86AudioMute        spawn "pamixer -t"
 
 # Audio
-qwertywmctl bind \$mod+u  spawn kitty ncpamixer
-qwertywmctl bind \$mod+o  spawn pavucontrol
+qwertywmctl bind $mod+u  spawn kitty ncpamixer
+qwertywmctl bind $mod+o  spawn pavucontrol
 
 # Bluetooth
-qwertywmctl bind \$mod+b  spawn kitty bluetuith
-qwertywmctl bind \$mod+Shift+b  spawn blueman-manager
+qwertywmctl bind $mod+b  spawn kitty bluetuith
+qwertywmctl bind $mod+Shift+b  spawn blueman-manager
 
 # Clipboard
-qwertywmctl bind \$mod+c  spawn kitty cliphist list \| fuzzel \| cliphist decode \| wl-copy
+qwertywmctl bind $mod+c  spawn "kitty cliphist list | fuzzel | cliphist decode | wl-copy"
 
 # Capturas
 qwertywmctl bind Print          spawn "grim -g \"\$(slurp)\" - | wl-copy"
-qwertywmctl bind \$mod+Shift+p   spawn "grim -g \"\$(slurp)\" - | swappy -f -"
+qwertywmctl bind $mod+Shift+p   spawn "grim -g \"\$(slurp)\" - | swappy -f -"
 
 # Bloqueo
-qwertywmctl bind \$mod+Shift+l  spawn hyprlock
+qwertywmctl bind $mod+Shift+l  spawn hyprlock
 
 # Mouse
-qwertywmctl bind-pointer \$mod+Left  move
-qwertywmctl bind-pointer \$mod+Right resize
+qwertywmctl bind-pointer $mod+Left  move
+qwertywmctl bind-pointer $mod+Right resize
 
 # Reglas flotantes
 qwertywmctl rule add -app-id pavucontrol float
@@ -381,6 +414,11 @@ selection-foreground=${sel_t}; selection-background=${sel}
 FOO
 
 # river init
+mon1_transform=""
+[ "$mon1_rotate" = "s" ] || [ "$mon1_rotate" = "S" ] && mon1_transform="--transform 90"
+mon2_transform=""
+[ "$mon2_rotate" = "s" ] || [ "$mon2_rotate" = "S" ] && mon2_transform="--transform 90"
+
 cat > ~/.config/river/init << RIV
 #!/bin/sh
 export XDG_CURRENT_DESKTOP=qwertywm
@@ -388,8 +426,19 @@ export XDG_SESSION_DESKTOP=qwertywm
 export MOZ_ENABLE_WAYLAND=1
 
 # ─── MONITORES (editá si tenés otros nombres) ───
-wlr-randr --output ${mon1:-DP-1} --pos 0,0
-wlr-randr --output ${mon2:-HDMI-A-1} --pos 1920,0
+RIV
+
+cat >> ~/.config/river/init << RIV
+wlr-randr --output ${mon1_name} --mode ${mon1_res} --pos 0,0 ${mon1_transform}
+RIV
+
+if [ -n "$mon2_name" ]; then
+    cat >> ~/.config/river/init << RIV
+wlr-randr --output ${mon2_name} --mode ${mon2_res} --pos ${mon1_res%x*},0 ${mon2_transform}
+RIV
+fi
+
+cat >> ~/.config/river/init << RIV
 
 # ─── APPS DE FONDO ───
 # swaybg -i ~/wallpaper.png -m fill &
@@ -404,12 +453,17 @@ qwertywmctl wait-for-socket
 . ~/.config/qwertywm/config
 
 # ─── WORKSPACES INICIALES ───
-qwertywmctl focus-output ${mon1:-DP-1}
+qwertywmctl focus-output ${mon1_name}
 qwertywmctl view 1
-qwertywmctl focus-output ${mon2:-HDMI-A-1}
-qwertywmctl view 11
-qwertywmctl focus-output ${mon1:-DP-1}
 RIV
+
+if [ -n "$mon2_name" ]; then
+    cat >> ~/.config/river/init << RIV
+qwertywmctl focus-output ${mon2_name}
+qwertywmctl view 11
+qwertywmctl focus-output ${mon1_name}
+RIV
+fi
 chmod +x ~/.config/river/init
 
 # ──────────────────── DISPLAY MANAGER ────────────────────
