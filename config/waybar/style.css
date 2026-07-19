@@ -6,7 +6,10 @@
 
 window#waybar { background: #000000; border: none; }
 
-#custom-qwertywm { color: #c0c0c0; background: #000000; padding: 0 8px; }
+#custom-qwertywm { background: #000000; padding: 0 8px; }
+#custom-qwertywm.hdmi { color: #00aa00; }
+#custom-qwertywm.dp { color: #5555ff; }
+#custom-qwertywm.both { color: #c0c0c0; }
 #custom-weather  { color: #00aaaa; background: #000000; padding: 0 8px; }
 #custom-conn     { color: #aa5500; background: #000000; padding: 0 8px; }
 #custom-tailscale { color: #5555ff; background: #000000; padding: 0 8px; }
