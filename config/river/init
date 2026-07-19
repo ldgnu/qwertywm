@@ -6,8 +6,6 @@ export MOZ_ENABLE_WAYLAND=1
 unset LD_PRELOAD
 
 # ─── MONITORES ───
-# HDMI-A-1: izquierda (principal)
-# DP-1: derecha (secundario, rotado 90°)
 wlr-randr --output HDMI-A-1 --mode 1920x1080 --pos 0,0
 wlr-randr --output DP-1 --mode 1920x1080 --pos 1920,0 --transform 90
 
@@ -22,8 +20,11 @@ qwertywmctl wait-for-socket
 . ~/.config/qwertywm/config
 
 # ─── WORKSPACES INICIALES ───
-qwertywmctl focus-output DP-1
-qwertywmctl view 1
+# HDMI-A-1 (izquierda, principal): workspaces 1-10
+# DP-1 (derecha, secundario): workspaces 11-20
 qwertywmctl focus-output HDMI-A-1
-qwertywmctl view 11
+qwertywmctl view 1
 qwertywmctl focus-output DP-1
+qwertywmctl view 11
+qwertywmctl focus-output HDMI-A-1
+qwertywmctl view 1
