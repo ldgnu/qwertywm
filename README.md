@@ -13,6 +13,12 @@ soporte multi-monitor de primera clase.
 
 ## Instalación rápida
 
+### One-liner (recomendado)
+```sh
+curl -fsSL https://raw.githubusercontent.com/ldgnu/qwertywm/main/install.sh | bash
+```
+Te pregunta todo: terminal, colores, teclado, monitores... y deja todo listo.
+
 ### AUR (Arch Linux)
 ```sh
 paru -S qwertywm
@@ -20,18 +26,7 @@ paru -S qwertywm
 yay -S qwertywm
 ```
 
-### Interactive installer (recomendado)
-
-Te pregunta todo: terminal, colores, teclado, monitores... y deja todo listo.
-
-```sh
-git clone https://github.com/ldgnu/qwertywm
-cd qwertywm
-./install.sh
-```
-
 ### Manual
-
 ```sh
 sudo pacman -S go river waybar fuzzel kitty foot ttf-liberation wlr-randr
 git clone https://github.com/ldgnu/qwertywm
@@ -39,9 +34,8 @@ cd qwertywm
 go build ./cmd/qwertywm
 go build -o qwertywmctl ./cmd/qwertywmctl
 sudo cp qwertywm qwertywmctl /usr/local/bin/
+cp -r config/* ~/.config/
 ```
-
-Después copiá las configs de `config/` a `~/.config/`.
 
 ---
 
