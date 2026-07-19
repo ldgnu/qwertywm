@@ -118,6 +118,10 @@ type Bridge struct {
 	// management state has been handed to the compositor. The IPC layer
 	// uses it to broadcast state snapshots to subscribers.
 	OnStateChange func()
+
+	// ConfigPath is the path to the config file sourced on startup and
+	// watched for hot-reload. If empty, reload-config is a no-op.
+	ConfigPath string
 }
 
 // windowState is the bridge's per-window protocol bookkeeping: the proxies
@@ -890,6 +894,12 @@ func (b *Bridge) Run(cmds <-chan Command) error {
 // the single entry point for commands from the IPC socket and from key and
 // pointer bindings.
 func (b *Bridge) runCommand(args []string) (string, error) {
+	// reload-config is handled by the bridge, not the core model, because
+	// it knows the config file path and sourcing requires a shell.
+	if len(args) == 1 && args[0] == "reload-config" && b.ConfigPath != "" {
+		b.spawn(". " + b.ConfigPath)
+		return "reloaded", nil
+	}
 	out, err := b.model.Dispatch(args)
 	b.drainSideEffects()
 	if err == nil && len(args) > 0 && args[0] == "keyboard-layout" {
