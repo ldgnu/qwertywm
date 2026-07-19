@@ -455,9 +455,12 @@ FOO
 # ---- RIVER INIT ----
 cat > ~/.config/river/init << RIV
 #!/bin/sh
-${mon_primary:+wlr-randr --output $mon_primary --pos 0,0 --mode 1920x1080}
-${mon_secondary:+wlr-randr --output $mon_secondary --pos 1920,0 --mode 1920x1080}
-${bar:+${bar} &}
+export XDG_CURRENT_DESKTOP=qwertywm
+export XDG_SESSION_DESKTOP=qwertywm
+
+\${mon_primary:+wlr-randr --output \$mon_primary --pos 0,0 --mode 1920x1080}
+\${mon_secondary:+wlr-randr --output \$mon_secondary --pos 1920,0 --mode 1920x1080}
+\${bar:+\${bar} &}
 qwertywm &
 qwertywmctl wait-for-socket
 . ~/.config/qwertywm/config
@@ -476,7 +479,7 @@ sudo tee /usr/share/wayland-sessions/qwertywm.desktop > /dev/null << 'EOF'
 [Desktop Entry]
 Name=qwertywm
 Comment=River compositor with qwertywm window manager
-Exec=river
+Exec=env XDG_CURRENT_DESKTOP=qwertywm XDG_SESSION_DESKTOP=qwertywm river
 Type=Application
 EOF
 
