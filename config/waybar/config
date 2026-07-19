@@ -1,38 +1,39 @@
 {
     "layer": "top",
+    "exclusive": true,
     "position": "top",
     "height": 26,
     "modules-left": ["custom/qwertywm"],
     "modules-center": ["custom/weather"],
     "modules-right": ["custom/conn", "custom/tailscale", "custom/cpu", "custom/gpu", "custom/date", "clock"],
     "custom/qwertywm": {
-        "exec": "~/.config/qwertywm/bar-status.sh",
+        "exec": "/home/ldgnu/.config/qwertywm/bar-status.sh",
         "interval": 1,
         "restart-interval": 5,
         "return-type": "json"
     },
     "custom/conn": {
-        "exec": "~/.config/waybar/scripts/conn.sh",
+        "exec": "/home/ldgnu/.config/waybar/scripts/conn.sh",
         "interval": 30,
         "return-type": "json"
     },
     "custom/tailscale": {
-        "exec": "~/.config/waybar/scripts/tailscale.sh",
+        "exec": "/home/ldgnu/.config/waybar/scripts/tailscale.sh",
         "interval": 30,
         "return-type": "json"
     },
     "custom/cpu": {
-        "exec": "~/.config/waybar/scripts/cpu.sh",
+        "exec": "/home/ldgnu/.config/waybar/scripts/cpu.sh",
         "interval": 5,
         "return-type": "json"
     },
     "custom/gpu": {
-        "exec": "~/.config/waybar/scripts/gpu.sh",
+        "exec": "/home/ldgnu/.config/waybar/scripts/gpu.sh",
         "interval": 5,
         "return-type": "json"
     },
     "custom/weather": {
-        "exec": "~/.config/waybar/scripts/weather.sh",
+        "exec": "/home/ldgnu/.config/waybar/scripts/weather.sh",
         "interval": 1800,
         "return-type": "json"
     },
