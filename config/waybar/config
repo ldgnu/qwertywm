@@ -1,8 +1,8 @@
 {
-      "layer": "top",
+    "layer": "bottom",
     "exclusive": true,
-    "position": "bottom",
-    "height": 26,
+    "position": "top",
+    "height": 24,
     "modules-left": ["custom/qwertywm"],
     "modules-center": ["custom/weather"],
     "modules-right": ["custom/conn", "custom/tailscale", "custom/cpu", "custom/gpu", "custom/date", "clock"],
@@ -45,5 +45,5 @@
         "interval": 60,
         "format": "{:%H:%M}",
         "tooltip": false
-      }
-  }
+    }
+}
