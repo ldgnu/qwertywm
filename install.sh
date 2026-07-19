@@ -247,9 +247,9 @@ qwertywmctl bind \$mod+Shift+space  toggle-float
 
 # Ventanas
 qwertywmctl bind \$mod+Ctrl+${f_l} spawn "qwertywmctl resize horizontal 10"
-qwertywmctl bind \$mod+Ctrl+${f_h} spawn "qwertywmctl resize horizontal -10"
-qwertywmctl bind \$mod+Ctrl+${f_j} spawn "qwertywmctl resize vertical 10"
-qwertywmctl bind \$mod+Ctrl+${f_k} spawn "qwertywmctl resize vertical -10"
+qwertywmctl bind \$mod+Ctrl+${f_r} spawn "qwertywmctl resize horizontal -10"
+qwertywmctl bind \$mod+Ctrl+${f_d} spawn "qwertywmctl resize vertical 10"
+qwertywmctl bind \$mod+Ctrl+${f_u} spawn "qwertywmctl resize vertical -10"
 
 # Monitores
 qwertywmctl bind \$mod+w  focus-output ${mon1:-DP-1}
@@ -392,7 +392,7 @@ export MOZ_ENABLE_WAYLAND=1
 # swaybg -i ~/wallpaper.png -m fill &
 
 wlsunset -t 4500 -S 22:00 -s 6:00 &
-\${bar:+\${bar} &}
+waybar &
 wl-paste --watch cliphist store &
 mako &
 
