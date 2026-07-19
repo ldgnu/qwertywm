@@ -22,15 +22,14 @@ fi
 # ──────────────────── SALUDO ────────────────────
 clear
 cat << "EOF"
-
-██   ██  ██████  ███████ ██████  ████████ ██    ██ ██     ██ ███    ███
-██  ██  ██       ██      ██   ██    ██     ██  ██  ██     ██ ████  ████
-█████   ██   ███ █████   ██████     ██      ████   ██  █  ██ ██ ████ ██
-██  ██  ██    ██ ██      ██   ██    ██       ██    ██ ███ ██ ██  ██  ██
-██   ██  ██████  ███████ ██   ██    ██       ██     ███ ███  ██      ██
-
-                 qwertywm  —  Window Manager para River
-                Hecho con 💚  por ldgnu (+IA helper)
+╔═══════════════════════════════════════════════╗
+║                                               ║
+║              qwertywm                         ║
+║       Window Manager para River               ║
+║                                               ║
+║       Hecho con 💚 por ldgnu (+IA helper)      ║
+║                                               ║
+╚═══════════════════════════════════════════════╝
 EOF
 echo ""
 echo "  Te voy a preguntar un par de cositas y dejo todo listo."
@@ -154,17 +153,15 @@ echo "╚═══════════════════════�
 echo ""
 
 # ──────────────────── PAQUETES ────────────────────
-packages="river go git wlr-randr ttf-liberation $terminal"
-[ -n "$launcher" ] && packages="$packages $launcher"
-[ -n "$bar" ] && packages="$packages waybar"
-
 echo "==> Instalando paquetes..."
-sudo pacman -S --needed --noconfirm $packages 2>/dev/null
-
-# extras en AUR
-if [ "$launcher" = "bemenu" ]; then
-    sudo pacman -S --needed --noconfirm bemenu 2>/dev/null || true
-fi
+sudo pacman -S --needed --noconfirm \
+    river go git wlr-randr ttf-liberation \
+    $terminal $launcher waybar \
+    playerctl pamixer grim slurp swappy \
+    wl-clipboard cliphist swaybg hyprlock \
+    mako wlsunset qutebrowser copyq \
+    blueman bluetuith ncpamixer pavucontrol \
+    yazi pulsemixer jq curl fastfetch 2>/dev/null || true
 
 # ──────────────────── COMPILAR ────────────────────
 echo "==> Compilando..."
@@ -225,20 +222,42 @@ qwertywmctl set main-ratio 0.5
 qwertywmctl set main-count 1
 qwertywmctl set main-location left
 qwertywmctl workspace-mode independent
+qwertywmctl keyboard-layout latam
 
+# Lanzadores
 qwertywmctl bind \$mod+Return  spawn \$terminal
 [ -n "$launcher" ] && qwertywmctl bind \$mod+d  spawn '\$launcher'
+qwertywmctl bind \$mod+e  spawn "kitty --title yazi yazi"
+qwertywmctl bind \$mod+w  spawn qutebrowser
 qwertywmctl bind \$mod+q  close
 qwertywmctl bind \$mod+Escape  exit
 qwertywmctl bind \$mod+r  spawn 'killall qwertywm 2>/dev/null; qwertywm &; qwertywmctl wait-for-socket; . ~/.config/qwertywm/config &'
 
+# Navegación vim
 qwertywmctl bind \$mod+${f_d}  focus next
 qwertywmctl bind \$mod+${f_u}  focus prev
 qwertywmctl bind \$mod+${f_l}  focus prev
 qwertywmctl bind \$mod+${f_r}  focus next
-qwertywmctl bind \$mod+space  cycle-layout monocle,left,top
-qwertywmctl bind \$mod+f  toggle-fullscreen
 
+# Layout
+qwertywmctl bind \$mod+space  cycle-layout monocle,left,top
+qwertywmctl bind \$mod+v      cycle-layout left,top
+qwertywmctl bind \$mod+f      toggle-fullscreen
+qwertywmctl bind \$mod+Shift+space  toggle-float
+
+# Ventanas
+qwertywmctl bind \$mod+Ctrl+${f_l} spawn "qwertywmctl resize horizontal 10"
+qwertywmctl bind \$mod+Ctrl+${f_h} spawn "qwertywmctl resize horizontal -10"
+qwertywmctl bind \$mod+Ctrl+${f_j} spawn "qwertywmctl resize vertical 10"
+qwertywmctl bind \$mod+Ctrl+${f_k} spawn "qwertywmctl resize vertical -10"
+
+# Monitores
+qwertywmctl bind \$mod+w  focus-output ${mon1:-DP-1}
+qwertywmctl bind \$mod+e  focus-output ${mon2:-HDMI-A-1}
+qwertywmctl bind \$mod+Shift+Tab  send-to-output next
+qwertywmctl bind \$mod+Tab        focus-output next
+
+# Escritorios 1-10 (Super)
 for i in 1 2 3 4 5 6 7 8 9; do
     qwertywmctl bind \$mod+\$i view \$i
     qwertywmctl bind \$mod+Shift+\$i send \$i
@@ -246,6 +265,7 @@ done
 qwertywmctl bind \$mod+0  view 10
 qwertywmctl bind \$mod+Shift+0  send 10
 
+# Escritorios 11-20 (Alt)
 for i in 1 2 3 4 5 6 7 8 9; do
     n=\$((i + 10))
     qwertywmctl bind Alt+\$i view \$n
@@ -254,11 +274,39 @@ done
 qwertywmctl bind Alt+0  view 20
 qwertywmctl bind Alt+Shift+0  send 20
 
+# Multimedia
+qwertywmctl bind \$mod+z  spawn "playerctl play-pause"
+qwertywmctl bind \$mod+x  spawn "playerctl next"
+qwertywmctl bind XF86AudioRaiseVolume spawn "pamixer -i 5"
+qwertywmctl bind XF86AudioLowerVolume spawn "pamixer -d 5"
+qwertywmctl bind XF86AudioMute        spawn "pamixer -t"
+
+# Audio
+qwertywmctl bind \$mod+u  spawn kitty ncpamixer
+qwertywmctl bind \$mod+o  spawn pavucontrol
+
+# Bluetooth
+qwertywmctl bind \$mod+b  spawn kitty bluetuith
+qwertywmctl bind \$mod+Shift+b  spawn blueman-manager
+
+# Clipboard
+qwertywmctl bind \$mod+c  spawn kitty cliphist list \| fuzzel \| cliphist decode \| wl-copy
+
+# Capturas
+qwertywmctl bind Print          spawn "grim -g \"\$(slurp)\" - | wl-copy"
+qwertywmctl bind \$mod+Shift+p   spawn "grim -g \"\$(slurp)\" - | swappy -f -"
+
+# Bloqueo
+qwertywmctl bind \$mod+Shift+l  spawn hyprlock
+
+# Mouse
 qwertywmctl bind-pointer \$mod+Left  move
 qwertywmctl bind-pointer \$mod+Right resize
 
-qwertywmctl bind \$mod+w  focus-output ${mon1:-DP-1}
-qwertywmctl bind \$mod+e  focus-output ${mon2:-HDMI-A-1}
+# Reglas flotantes
+qwertywmctl rule add -app-id pavucontrol float
+qwertywmctl rule add -title ncpamixer float
+qwertywmctl rule add -title bluetuith float
 CFG
 chmod +x ~/.config/qwertywm/config
 
@@ -335,17 +383,27 @@ cat > ~/.config/river/init << RIV
 #!/bin/sh
 export XDG_CURRENT_DESKTOP=qwertywm
 export XDG_SESSION_DESKTOP=qwertywm
-${mon1:+wlr-randr --output $mon1 --pos 0,0}
-${mon2:+wlr-randr --output $mon2 --pos 1920,0}
-${bar:+${bar} &}
+export MOZ_ENABLE_WAYLAND=1
+
+\${mon1:+wlr-randr --output \$mon1 --pos 0,0}
+\${mon2:+wlr-randr --output \$mon2 --pos 1920,0}
+
+# Wallpaper (poné tu imagen en ~/wallpaper.png o cambiala)
+# swaybg -i ~/wallpaper.png -m fill &
+
+wlsunset -t 4500 -S 22:00 -s 6:00 &
+\${bar:+\${bar} &}
+wl-paste --watch cliphist store &
+mako &
+
 qwertywm &
 qwertywmctl wait-for-socket
 . ~/.config/qwertywm/config
-${mon1:+qwertywmctl focus-output $mon1}
+\${mon1:+qwertywmctl focus-output \$mon1}
 qwertywmctl view 1
-${mon2:+qwertywmctl focus-output $mon2}
-${mon2:+qwertywmctl view 11}
-${mon1:+qwertywmctl focus-output $mon1}
+\${mon2:+qwertywmctl focus-output \$mon2}
+\${mon2:+qwertywmctl view 11}
+\${mon1:+qwertywmctl focus-output \$mon1}
 RIV
 chmod +x ~/.config/river/init
 
