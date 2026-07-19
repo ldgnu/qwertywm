@@ -3,9 +3,13 @@
 mod=Super
 terminal=kitty
 launcher=fuzzel
-mon_left="DP-1"
-mon_right="HDMI-A-1"
+mon_left="HDMI-A-1"
+mon_right="DP-1"
 # ─────────────────
+
+# Monitores
+wlr-randr --output HDMI-A-1 --mode 1920x1080 --pos 0,0
+wlr-randr --output DP-1 --mode 1920x1080 --pos 1920,0 --transform 90
 
 qwertywmctl set border-width 2
 qwertywmctl set border-color-focused   0x00aa00ff

@@ -6,10 +6,10 @@ export MOZ_ENABLE_WAYLAND=1
 unset LD_PRELOAD
 
 # ─── MONITORES ───
-# DP-1: izquierda (principal)
-# HDMI-A-1: derecha (secundario)
-wlr-randr --output DP-1 --mode 1920x1080 --pos 0,0
-wlr-randr --output HDMI-A-1 --mode 1920x1080 --pos 1920,0
+# HDMI-A-1: izquierda (principal)
+# DP-1: derecha (secundario, rotado 90°)
+wlr-randr --output HDMI-A-1 --mode 1920x1080 --pos 0,0
+wlr-randr --output DP-1 --mode 1920x1080 --pos 1920,0 --transform 90
 
 # ─── APPS DE FONDO ───
 waybar &
