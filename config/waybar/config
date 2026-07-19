@@ -1,5 +1,5 @@
 {
-    "layer": "bottom",
+      "layer": "top",
     "exclusive": true,
     "position": "bottom",
     "height": 26,
@@ -45,5 +45,5 @@
         "interval": 60,
         "format": "{:%H:%M}",
         "tooltip": false
-    }
-}
+      }
+  }

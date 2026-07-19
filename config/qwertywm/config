@@ -30,7 +30,7 @@ qwertywmctl bind $mod+y  spawn "kitty --title yazi yazi"
 qwertywmctl bind $mod+b  spawn qutebrowser
 qwertywmctl bind $mod+q  close
 qwertywmctl bind $mod+Escape  exit
-qwertywmctl bind $mod+r  spawn 'killall qwertywm 2>/dev/null; qwertywm &; qwertywmctl wait-for-socket; . ~/.config/qwertywm/config &'
+qwertywmctl bind $mod+Shift+r  spawn 'killall qwertywm 2>/dev/null; qwertywm &; qwertywmctl wait-for-socket; . ~/.config/qwertywm/config &'
 
 qwertywmctl bind $mod+j  focus next
 qwertywmctl bind $mod+k  focus prev
