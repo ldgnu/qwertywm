@@ -1,54 +1,5 @@
-* {
-    font-family: "Terminus";
-    font-weight: bold;
-    font-size: 14px;
-    min-height: 0;
-    padding: 0;
-    margin: 0;
-    border: none;
+* { font-family: "Liberation Mono"; font-size: 12px; }
+window#waybar, #custom-qwertywm, #clock, #date {
+    background: #000000; color: #c0c0c0; border: none;
 }
-
-window#waybar {
-    background: #1B1D1E;
-    color: #BBBBBB;
-}
-
-#custom-qwertywm {
-    color: #BBBBBB;
-    padding: 0 2px;
-}
-
-#custom-weather {
-    color: #60D4DF;
-    padding: 0 4px;
-}
-
-#custom-tailscale {
-    color: #D08010;
-    padding: 0 4px;
-}
-
-#custom-cpu {
-    color: #23E298;
-    padding: 0 4px;
-}
-
-#custom-gpu {
-    color: #D0A843;
-    padding: 0 4px;
-}
-
-#custom-date {
-    color: #BBBBBB;
-    padding: 0 4px;
-}
-
-#clock {
-    color: #BBBBBB;
-    padding: 0 8px;
-}
-
-#custom-conn {
-    color: #FF0087;
-    padding: 0 4px;
-}
+#custom-qwertywm, #clock, #date { padding: 0 6px; }

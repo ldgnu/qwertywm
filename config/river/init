@@ -25,3 +25,4 @@ qwertywmctl view 1
 qwertywmctl focus-output DP-1
 qwertywmctl view 11
 qwertywmctl focus-output HDMI-A-1
+

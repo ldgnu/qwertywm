@@ -17,7 +17,7 @@ qwertywmctl set main-ratio 0.5
 qwertywmctl set main-count 1
 qwertywmctl set main-location left
 qwertywmctl workspace-mode independent
-qwertywmctl keyboard-layout latam
+qwertywmctl keyboard-layout us
 
 qwertywmctl bind $mod+Return  spawn $terminal
 qwertywmctl bind $mod+d  spawn $launcher
