@@ -1,12 +1,15 @@
 # qwertywm
 
-<img width="1914" alt="qwertywm" src="https://github.com/user-attachments/assets/e33b5b7f-71ed-4b55-983e-dc1b6f79dd95" />
+
+<img width="1913" alt="qwertywm barra" src="https://github.com/user-attachments/assets/7eeb694a-d812-43a9-8541-29ef05e92f32" />
+
 
 Dynamic tiling window manager for the [River](https://codeberg.org/river/river) Wayland compositor.
 Forked from [weir](https://github.com/psanford/weir).
 
 <img width="1918" alt="qwertywm escritorios" src="https://github.com/user-attachments/assets/44bae52a-df8e-474b-b465-d75aa3746cc5" />
-<img width="1913" alt="qwertywm barra" src="https://github.com/user-attachments/assets/7eeb694a-d812-43a9-8541-29ef05e92f32" />
+<img width="1914" alt="qwertywm" src="https://github.com/user-attachments/assets/e33b5b7f-71ed-4b55-983e-dc1b6f79dd95" />
+
 
 ## ⚡ Quick Install (Arch Linux)
 
