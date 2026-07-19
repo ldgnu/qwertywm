@@ -1,7 +1,7 @@
 {
-    "layer": "top",
+    "layer": "bottom",
     "exclusive": true,
-    "position": "top",
+    "position": "bottom",
     "height": 26,
     "modules-left": ["custom/qwertywm"],
     "modules-center": ["custom/weather"],

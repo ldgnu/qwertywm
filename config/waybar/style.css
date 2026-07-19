@@ -1,8 +1,10 @@
 * {
     font-family: "Liberation Mono";
-    font-size: 12px;
+    font-size: 13px;
     min-height: 0;
 }
+
+window#waybar { background: #000000; border: none; font-size: 13px; }
 
 window#waybar { background: #000000; border: none; }
 
