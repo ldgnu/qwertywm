@@ -102,7 +102,7 @@ func run(logger *slog.Logger, socketOverride, configPath string) error {
 			return err
 		}
 	}
-	cmds := make(chan bridge.Command)
+	cmds := make(chan bridge.Command, 16)
 	srv, err := ipc.Listen(socketPath, &commandClient{cmds: cmds}, logger)
 	if err != nil {
 		return err

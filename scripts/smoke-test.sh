@@ -19,7 +19,7 @@ trap 'rm -rf "$dir"' EXIT
 mkdir -p -m 0700 "$dir/run"
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
-go build -o "$dir/weir" "$repo/cmd/weir"
+go build -o "$dir/weir" "$repo/cmd/qwertywm"
 
 # The init script river runs once its Wayland socket is ready. It starts
 # weir and some clients in the background and exits; river survives until

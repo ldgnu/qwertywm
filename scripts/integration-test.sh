@@ -14,8 +14,8 @@ trap 'rm -rf "$dir"' EXIT
 mkdir -p -m 0700 "$dir/run"
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
-go build -o "$dir/weir" "$repo/cmd/weir"
-go build -o "$dir/weirctl" "$repo/cmd/weirctl"
+go build -o "$dir/weir" "$repo/cmd/qwertywm"
+go build -o "$dir/weirctl" "$repo/cmd/qwertywmctl"
 
 # The test body runs inside the river session (so WAYLAND_DISPLAY and the
 # control socket are reachable). It writes PASS/FAIL lines to the verdict
